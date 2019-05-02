@@ -32,8 +32,8 @@ class System(object):
         
         self.n = n  # The number of agents in the network
         self.new_edges = 2  # The number of edges created with each new node
-        self.p = p  # The probability of a node using an estimate type
         self.tri = 0.5 # The probability of a new edge creating a triangle
+        self.p = p  # The probability of a node using an estimate type
         
         # Generate the network using generate_network
         self.system = self.generate_network()
