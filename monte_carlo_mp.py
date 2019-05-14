@@ -87,7 +87,7 @@ if __name__ == '__main__':
     num_prob = len(est_prob)
     
     # A list of the different estimation methods used for historical data
-    est_meth = ["future_est", "best_est"]
+    est_meth = ["best_est"]
     num_meth = len(est_meth)
 
 
