@@ -17,8 +17,8 @@ import datetime as dt
 t_start = dt.datetime.now()
 
 # Generate a system with n nodes
-n = 100
-s1 = sy.System(n,"sphere",0.9,"current_always")
+n = 1000
+s1 = sy.System(n,"sphere") 
 
 # Plot the system
 options = {
@@ -71,4 +71,4 @@ plt.show()
 
 # Stop timer
 t_stop = dt.datetime.now()
-print(t_stop - t_start)
+print((t_stop - t_start))

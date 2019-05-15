@@ -12,8 +12,7 @@ inition of the class agent including its properties. Those properties include a
 selection of an objective function, definition of a current estimate,
 definition of a historical median as a future projection estimate, and the
 position of the agent in the system network. Both inputs are optional, and may
-be specified as follows below.
-
+be specified as follows below
 Parameters:
     
     loc = [0,1,...,n-2,n-1]
@@ -23,11 +22,6 @@ Parameters:
     nbr = vect{[0,1,...,n-2,n-1]}
         A vector of integer values from 0 to n-1 which specifies the nodes in
         the network (by integer) which are neighbors of this agent.
-    prob = [0,1]
-        A value on the continuous domain from 0 to 1 which specifies the
-        probability that an agent will generate estimates corresponding to
-        a future design. Therefore, a value of 0 corresponds to 100% current
-        designs and a value of 1 corresponds to 100% future designs.
     obj = (string)
         A string input which specifies the objective function the agent uses
         to evaluate the quality of a design. The input must be one of the
@@ -37,24 +31,7 @@ Parameters:
             "ackley"          - uses the Ackley function as the objective
             "rosenbrock"      - uses the Rosenbrock function as the objective
             "styblinski-tang" - uses the Styblinski-Tang function as objective
-    mthd = (string)
-        A string input which specifies which method of future projection
-        estimates agents will make if they are specified as returning future
-        estimates. The input must be one of the following terms, specified with
-        quotes:
-            "future_always"   - always returns the median of the historical
-                                distribution as the estimate, even if the
-                                current estimate is better
-            "current_always"  - always returns the current estimate, even if
-                                the historical median is better; provided in
-                                case of potential issues with probabilities,
-                                but unlikely necessary option
-            "best_est"        - returns the better of the future estimate or
-                                the current estimate depending on which of the
-                                two estimates has a lower objective function
-                                evaluation, where lower evaluations are better
-            (none)            - the same as the best_est case
-
+                               
 -------------------------------------------------------------------------------
 Change Log:
 
@@ -77,7 +54,8 @@ class Agent(object):
     '''Defines a class agent which designs an artifact in a system.'''
 
 
-    def __init__(self, loc, nbr, prob=0.5, obj="sphere", mthd = ""):
+    def __init__(self, loc, nbr, obj="sphere"):
+
         '''Initializes an agent with all of its properties.'''
 
         ##### Network Properties #####
@@ -105,17 +83,12 @@ class Agent(object):
 
         ##### Estimate Properties #####
         
-        self.mthd = mthd  # Initialize the type of future estimates being made
         self.curr_est = Obj_Eval()  # Initialize the agent's current estimate
         self.history = []  # First row x's, second row f(x)'s
         self.hist_med = Obj_Eval()  # Initialize the agent's historical median
 
-        # Determine the type of estimate being used by the agent. If greater
-        # than estimate probability...
-        if (np.random.random_sample() > prob):
-            self.est_type = "current"  # Set estimate type as current design
-        else:  # Else less than or equal to the estimate probability
-            self.est_type = "future"  # Set estimate type as future projection
+        # Determine the type of estimate being used by the agent.
+        self.est_type = "current"  # Set estimate type as current design
 
 
     def __repr__(self):
@@ -168,12 +141,6 @@ class Agent(object):
         self.hist_in = [h.x for h in self.history]
         self.hist_out = [h.fx for h in self.history]
         
-        # Initialize the agent's future estimate by using the historical
-        # median's value.
-        self.median_index = np.argsort(self.hist_out)[len(self.hist_out)//2]
-        self.hist_med.x = self.hist_in[self.median_index]
-        self.hist_med.fx = self.hist_out[self.median_index]
-        
         # Initialize the agent's current estimate by randomly generating an
         # a value on the domain of the objective function inputs
         # (-bound,+bound)
@@ -187,9 +154,6 @@ class Agent(object):
         system. Then, (as in this method) the system feeds the system vector
         back to the agents to populate the objective evaluations. Both the
         hist_med and curr_est function evaluations are performed here.'''
-        
-        # Get the historical median's objective evaluation
-        self.hist_med.fx = self.hist_out[self.median_index]
         
         # Get own value for initial evaluation
         xi = self.curr_est.x
@@ -205,40 +169,15 @@ class Agent(object):
         '''Returns the appropriate estimate according to the type of estimate
         the agent is designated to return.'''
         
-        # Return an estimate ("current" or "future")
-        if self.est_type == "current":
-            return self.curr_est  # Return current value to system
-        else:  # self.est_type == "future"
-            
-            # Select return based on estimation method
-            if self.mthd == "future_always":
-                
-                # Always return the future value
-                return self.hist_med
-            
-            elif self.mthd == "current_always":
-                
-                # Always return the current value
-                return self.curr_est
-                
-            else: # self.mthd == "best_est":
-                
-                # Only return the future value until the current is better.
-                # Return the lesser of the historical median and current value.
-                if self.curr_est.fx < self.hist_med.fx:
-                    # The current estimate is better, so return it
-                    return self.curr_est
-                else:
-                    # Return historical median to system
-                    return self.hist_med
-
-
+        # Return an estimate ("current") 
+        return self.curr_est  # Return current value to system
+    
     def generate_estimate(self,sys_vect):
         '''Uses a system vector input and the current agent estimate to
         generate one estimate value for the agent. The agent then compiles the
         generated decision variable value and objective evaluation. Finally,
         the agent uses its estimate type to determine which value (the current
-        or future) of the estimate to return.'''
+        or future) of the estimate to return.''' ### Should always return current
         
         xi = self.curr_est.x
         
