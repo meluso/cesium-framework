@@ -4,9 +4,16 @@
 @date: 2018-10-10
 @name: model_system.py
 
+-------------------------------------------------------------------------------
+Description:
+
 This file contains a model of networked miscommunication in a system. It creates
 the system network, the agents assigned to each node in the network, the
 history of each agent in the network, and the process of designing the system.
+
+The file takes in a certain amount of nodes to create a system along with an 
+objective function to find the amount of design cycles that is required for the
+system to converge. 
 
 -------------------------------------------------------------------------------
 Change Log:

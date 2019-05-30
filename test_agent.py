@@ -4,7 +4,17 @@
 @date: 2018-10-18
 @name: test_agent.py
 
+-------------------------------------------------------------------------------
+Description:
+
 This file tests the agent class.
+
+The file creantes an agent using its location, the amount of neighbors that it 
+has, and the objective funtion that is being used ("ackley", "rosenbrock", 
+"styblinski-tang", and "sphere").
+The file prints out results for three sets of estimates.  
+ 
+-------------------------------------------------------------------------------
 """
 
 import model_agent as ag

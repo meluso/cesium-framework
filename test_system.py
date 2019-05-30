@@ -4,8 +4,19 @@
 @date: 2018-10-21
 @name: test_system.py
 
+-------------------------------------------------------------------------------
+Description:
+
 This file tests the system class.
 
+The file takes in the amount of nodes that are present in the system and the 
+objective function to show how many connections occur between the nodes through
+a network diagram.
+
+The plot that follows shows the amount of nodes that have the same amount of 
+connections. 
+
+-------------------------------------------------------------------------------
 """
 
 import model_system as sy

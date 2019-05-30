@@ -41,6 +41,8 @@ Date:       Author:    Description:
                        model to perform in a way which produces meaningful
                        results.
 2019-03-28  rojanov    Updated code for python3. 
+2019-05-24  rojanov    Updated objective function for basin-hopping...removed 
+                       brent scalar minimization function
 -------------------------------------------------------------------------------
 """
 
@@ -225,14 +227,6 @@ class Agent(object):
             else:
                 result = Obj_Eval(output.x[0],output.fun)
             
-        else:  # Use gradient for single- or few-minimum functions
-            
-            # Call the bounded brent scalar minimization function
-            output = opt.minimize_scalar(fun = self.objective,
-                             bounds = (self.obj_bounds.xmin,\
-                                       self.obj_bounds.xmax),
-                             args = xj,
-                             method = 'bounded')
             
             # Save the desired outputs
             result = Obj_Eval(output.x,output.fun)
