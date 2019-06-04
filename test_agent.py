@@ -23,7 +23,7 @@ import matplotlib.pylab as plt
 import doe_lhs as doe
 
 # Create an instance of an agent
-a1 = ag.Agent(2,[0,3],"ackley") 
+a1 = ag.Agent(2,[0,3],"sphere") 
 print(("Location = " + str(a1.location)))
 print(("Neighbors = " + str(a1.neighbors)))
 print(("Bound = " + str(a1.obj_bounds.xmax)))

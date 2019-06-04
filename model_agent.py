@@ -56,7 +56,7 @@ class Agent(object):
     '''Defines a class agent which designs an artifact in a system.'''
 
 
-    def __init__(self, loc, nbr, obj="sphere"):
+    def __init__(self, loc, nbr, obj="ackley"):
 
         '''Initializes an agent with all of its properties.'''
 
