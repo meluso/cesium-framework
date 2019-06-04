@@ -18,12 +18,12 @@ system to converge.
 -------------------------------------------------------------------------------
 Change Log:
 Date:       Author:    Description:
-2018-10-10  jmeluso    Initial version started.
+2018-10-10  jmeluso    Initial version.
 2019-05-02  jmeluso    Corrected misallocation of probability for communication
                        type to network triangle formation. Now triangles are
                        set to form with a 50% probability statically.
+                       
 -------------------------------------------------------------------------------
-
 """
 
 # Import python packages

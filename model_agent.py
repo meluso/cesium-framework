@@ -200,8 +200,8 @@ class Agent(object):
     def optimize(self,xi,xj):
         '''Optimizes the agent's design using the objective function and inputs
         from neighbor agents. The function takes in the agent's own value (xi)
-        and the neighbors vector (xj). It selects the appropriate optimization
-        algorithm for the function.'''
+        and the neighbors vector (xj). Uses the basinhopping algorithm to
+        optimize the objective function.'''
         
         # Use basinhopping only for multiple-minimum functions
         if self.fn == "ackley":

@@ -15,6 +15,12 @@ has, and the objective funtion that is being used ("ackley", "rosenbrock",
 The file prints out results for three sets of estimates.  
  
 -------------------------------------------------------------------------------
+Change Log:
+
+Date:       Author:    Description:
+2018-10-10  jmeluso    Initial version.
+
+-------------------------------------------------------------------------------
 """
 
 import model_agent as ag

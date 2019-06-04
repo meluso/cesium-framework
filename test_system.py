@@ -17,6 +17,12 @@ The plot that follows shows the amount of nodes that have the same amount of
 connections. 
 
 -------------------------------------------------------------------------------
+Change Log:
+
+Date:       Author:    Description:
+2018-10-10  jmeluso    Initial version.
+
+-------------------------------------------------------------------------------
 """
 
 import model_system as sy
