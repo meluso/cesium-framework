@@ -7,12 +7,12 @@
 -------------------------------------------------------------------------------
 Description:
     
-This file contains a model of an agent in a the system. It contains the def-
-inition of the class agent including its properties. Those properties include a
-selection of an objective function, definition of a current estimate,
-definition of a historical median as a future projection estimate, and the
+This file contains a model of an agent in a system. It contains the definition
+of the class agent including its properties. Those properties include a
+selection of an objective function, definition of a current estimate, and the
 position of the agent in the system network. Both inputs are optional, and may
-be specified as follows below
+be specified as follows below. Additional objective functions may be added to
+the code following the format of the existing functions.
 Parameters:
     
     loc = [0,1,...,n-2,n-1]
@@ -42,7 +42,8 @@ Date:       Author:    Description:
                        results.
 2019-03-28  rojanov    Updated code for python3. 
 2019-05-24  rojanov    Updated objective function for basin-hopping...removed 
-                       brent scalar minimization function
+                       brent scalar minimization function.
+2019-06-19  jmeluso    Removed historical estimate code.
 -------------------------------------------------------------------------------
 """
 
@@ -86,62 +87,15 @@ class Agent(object):
         ##### Estimate Properties #####
         
         self.curr_est = Obj_Eval()  # Initialize the agent's current estimate
-        self.history = []  # First row x's, second row f(x)'s
-        self.hist_med = Obj_Eval()  # Initialize the agent's historical median
-
-        # Determine the type of estimate being used by the agent.
-        self.est_type = "current"  # Set estimate type as current design
 
 
     def __repr__(self):
         '''Returns a representation of the agent'''
         return self.__class__.__name__
         
-    
-    def rand_hist_init(self,lhs_vect):
-        '''Takes in a latin hypercube vector initialization to run a single
-        design cycle. It then feeds this result back to the system without
-        saving. This method is coupled with save history.'''
-        
-        xi = lhs_vect[self.location]
-        
-        # Initialize a vector of neighbors' values from Latin Hypercube Sample
-        # vector (not an object Ojb_Eval)
-        xj = [lhs_vect[j] for j in self.neighbors]
-
-        # Optimize from the given inputs for one iteration
-        result = self.optimize(xi,xj)
-        
-        # Return just the x from the optimized result
-        return result
-    
-    
-    def save_history(self,sys_vect):
-        '''Saves a historical point by receiving corresponding optimized values
-        from the other agents as it optimized its own variable. It then uses
-        the objective function to evaluate the system vector. The x and f(x)
-        of this evaluation are the saved historical point.'''
-        
-        xi = sys_vect[self.location].x
-        
-        # Initialize a vector of neighbors' values from the system vector
-        # (which is an object Ojb_Eval)
-        xj = [sys_vect[j].x for j in self.neighbors]
-        
-        # Evaluate the given inputs
-        result = self.objective(xi, xj)
-        
-        # Save x and f(x) as an objective evaluation to the history list
-        self.history.append(Obj_Eval(xi,result))
-        
         
     def initialize_estimates(self):
-        '''Uses the history generated so far to set the historical median and
-        generates a random value for the initial current estimate.'''
-        
-        # Extract the input and output values from the agent's history.
-        self.hist_in = [h.x for h in self.history]
-        self.hist_out = [h.fx for h in self.history]
+        '''Generates a random value for the initial current estimate.'''
         
         # Initialize the agent's current estimate by randomly generating an
         # a value on the domain of the objective function inputs
@@ -151,11 +105,9 @@ class Agent(object):
         
         
     def initialize_evaluations(self,sys_vect):
-        '''Once all of the agents have been populated with their histories,
-        they come up with an initial estiamte which they feed back to the
-        system. Then, (as in this method) the system feeds the system vector
-        back to the agents to populate the objective evaluations. Both the
-        hist_med and curr_est function evaluations are performed here.'''
+        '''Generates an initial estiamte which the agent feeds back to the
+        system. Then, the system feeds the system vector back to the agents
+        to populate the objective evaluations.'''
         
         # Get own value for initial evaluation
         xi = self.curr_est.x
@@ -202,34 +154,27 @@ class Agent(object):
         from neighbor agents. The function takes in the agent's own value (xi)
         and the neighbors vector (xj). Uses the basinhopping algorithm to
         optimize the objective function.'''
-        
-        # Use basinhopping only for multiple-minimum functions
-        if self.fn == "ackley":
             
-            # Define arguments for basin hopping minimization
-            args = {"method": "L-BFGS-B",
-                    "bounds": [(self.obj_bounds.xmin,self.obj_bounds.xmax)],
-                    "args": xj}
+        # Define arguments for basin hopping minimization
+        args = {"method": "L-BFGS-B",
+                "bounds": [(self.obj_bounds.xmin,self.obj_bounds.xmax)],
+                "args": xj}
 
-            # Call the basin hopping minimization method
-            output = opt.basinhopping(func = self.objective,
-                             x0 = xi,
-                             niter = 1,
-                             stepsize = (self.obj_bounds.xmax \
-                                         - self.obj_bounds.xmin)/10,
-                             minimizer_kwargs = args,
-                             accept_test = self.obj_bounds
-                             )
-            
-            # Save the desired outputs in float format
-            if isinstance(output.fun,np.ndarray):
-                result = Obj_Eval(output.x[0],output.fun[0])
-            else:
-                result = Obj_Eval(output.x[0],output.fun)
-            
-            
-            # Save the desired outputs
-            result = Obj_Eval(output.x,output.fun)
+        # Call the basin hopping minimization method
+        output = opt.basinhopping(func = self.objective,
+                         x0 = xi,
+                         niter = 1,
+                         stepsize = (self.obj_bounds.xmax \
+                                     - self.obj_bounds.xmin)/10,
+                         minimizer_kwargs = args,
+                         accept_test = self.obj_bounds
+                         )
+        
+        # Save the desired outputs in float format
+        if isinstance(output.fun,np.ndarray):
+            result = Obj_Eval(output.x[0],output.fun[0])
+        else:
+            result = Obj_Eval(output.x[0],output.fun)
         
         # Return the result
         return result

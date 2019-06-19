@@ -7,13 +7,13 @@
 -------------------------------------------------------------------------------
 Description:
 
-This file contains a model of networked miscommunication in a system. It creates
-the system network, the agents assigned to each node in the network, the
-history of each agent in the network, and the process of designing the system.
+This file contains a model a complex engineered system development process. It
+creates the system network, the agents assigned to each node in the network,
+and the process of designing the system.
 
 The file takes in a certain amount of nodes to create a system along with an 
 objective function to find the amount of design cycles that is required for the
-system to converge. 
+system to converge.
 
 -------------------------------------------------------------------------------
 Change Log:
@@ -22,6 +22,7 @@ Date:       Author:    Description:
 2019-05-02  jmeluso    Corrected misallocation of probability for communication
                        type to network triangle formation. Now triangles are
                        set to form with a 50% probability statically.
+2019-06-19  jmeluso    Removed historical estimate code.
                        
 -------------------------------------------------------------------------------
 """
@@ -30,7 +31,6 @@ Date:       Author:    Description:
 from networkx.generators.random_graphs import powerlaw_cluster_graph as gen
 import numpy as np
 import model_agent as ag
-import doe_lhs as doe
 
 class System(object):
     '''Defines a class system which contains a specified number of agents that
@@ -54,15 +54,11 @@ class System(object):
         
         ##### System Properties #####
         
-        self.s = 101  # The number of hypercube sampling partitions
         self.conv_lim = 1  # System convergence limit
         
         # Vector (old and new) of the agents' returned values
         self.vect = [ag.Obj_Eval() for i in range(n)]
         self.vect_new = [ag.Obj_Eval() for i in range(n)]
-        
-        # Generate the system history        
-        self.generate_history()
         
         for i in range(len(self.system)):
             
@@ -72,7 +68,7 @@ class System(object):
             # Return the estimates to the system
             self.vect_new[i] = self.system[i].get_estimate()
         
-        # Create a vector of just estimates for evaluation initialization
+        # Create a vector of just estimates (x's) for evaluation initialization
         est_vect = [self.vect_new[i].x for i in range(self.n)]
         
         for i in range(len(self.system)):
@@ -114,41 +110,6 @@ class System(object):
             
         # Return the generated network of agents
         return system
-
-
-    def generate_history(self):
-        '''Creates a historical profile for all of the agents through Latin
-        Hypercube sampling all of the agents a specified number of times.'''
-        
-        # Generate a latin hypercube sampling for the agents
-        samples = 101  # Set number of samples to take
-        
-        # Create the hypercube sample
-        self.hypercube = doe.lhs(self.n,samples)
-        
-        # Scale the hypercube samples to the agents' bounds
-        for i in range(len(self.system)):
-            
-            # Get bounds from agent
-            min_val = self.system[i].obj_bounds.xmin
-            max_val = self.system[i].obj_bounds.xmax
-            
-            # Scale all of the agents' samples to that range
-            for h in range(samples):
-                self.hypercube[h][i] = min_val + (max_val - min_val)* \
-                                       self.hypercube[h][i]
-        
-        # Cycle through all of the hypercube sample vectors
-        for h in range(samples):
-            
-            # Give the agents initial points to run one optimization on
-            for i in range(len(self.system)):
-                self.vect_new[i] = \
-                    self.system[i].rand_hist_init(self.hypercube[h])
-            
-            # Give agents the optimized vector to evaluate and save
-            for a in self.system:
-                a.save_history(self.vect_new)
     
     
     def design_cycle(self):
@@ -165,8 +126,8 @@ class System(object):
             
     
     def run(self):
-        '''Designs the system. Assumes the system has already been initialized
-        with histories for each agent.'''
+        '''Designs the system. Assumes the system has already initialized
+        each agent.'''
         
         # Initialize design cycle counter and convergence flag
         dc = 0
