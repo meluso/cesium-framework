@@ -21,6 +21,7 @@ Change Log:
 
 Date:       Author:    Description:
 2018-10-10  jmeluso    Initial version.
+2019-07-09  jmeluso    Updated to new inputs System(n,obj,edg,tri,con,div,itr). 
 
 -------------------------------------------------------------------------------
 """
@@ -33,9 +34,17 @@ import datetime as dt
 # Start timer
 t_start = dt.datetime.now()
 
-# Generate a system with n nodes
-n = 1000
-s1 = sy.System(n,"sphere") 
+# Generate a system with n nodes, obj objective function, edg random edges,
+# tri probability of triange, con convergence threshold, div divisions for step
+# size, and itr iterations for basin-hopping
+n = 100
+obj = "ackley"
+edg = 2
+tri = 0.5
+con = 1
+div = 10
+itr = 1
+s1 = sy.System(n,obj,edg,tri,con,div,itr) 
 
 # Plot the system
 options = {

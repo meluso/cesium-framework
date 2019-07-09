@@ -31,6 +31,16 @@ Parameters:
             "ackley"          - uses the Ackley function as the objective
             "rosenbrock"      - uses the Rosenbrock function as the objective
             "styblinski-tang" - uses the Styblinski-Tang function as objective
+    div = [1,inf)
+        A number which determines the step size of the basin-hopping algorithm.
+        The difference of the domain bounds is divided by this number to set
+        the step size. The value must be greater than or equal to 1, and the
+        default value is set to 10. 
+    itr = [1,2,...,inf)
+        The number of iterations that the basin-hopping algorithm will run per
+        execution. The default value is 1 to increase the difficulty of
+        converging, but the value may be increased by integer values.
+        
                                
 -------------------------------------------------------------------------------
 Change Log:
@@ -44,6 +54,7 @@ Date:       Author:    Description:
 2019-05-24  rojanov    Updated objective function for basin-hopping...removed 
                        brent scalar minimization function.
 2019-06-19  jmeluso    Removed historical estimate code.
+2019-07-08  jmeluso    Added div and itr parameters for monte carlo testing.
 -------------------------------------------------------------------------------
 """
 
@@ -57,7 +68,7 @@ class Agent(object):
     '''Defines a class agent which designs an artifact in a system.'''
 
 
-    def __init__(self, loc, nbr, obj="ackley"):
+    def __init__(self, loc, nbr, obj="ackley", div=10, itr=1):
 
         '''Initializes an agent with all of its properties.'''
 
@@ -83,7 +94,12 @@ class Agent(object):
             self.obj_bounds = Bounds(-5.00,5.00)
         else:  # self.fn == "sphere" or none
             self.obj_bounds = Bounds(-5.12,5.12)
-
+        
+        ##### Optimization Properties #####
+        
+        self.dom_div = div  # Num. of segments to divide the domain into
+        self.iterations = itr  # Number of iterations for the optimization
+        
         ##### Estimate Properties #####
         
         self.curr_est = Obj_Eval()  # Initialize the agent's current estimate
@@ -163,9 +179,9 @@ class Agent(object):
         # Call the basin hopping minimization method
         output = opt.basinhopping(func = self.objective,
                          x0 = xi,
-                         niter = 1,
+                         niter = self.iterations,
                          stepsize = (self.obj_bounds.xmax \
-                                     - self.obj_bounds.xmin)/10,
+                                     - self.obj_bounds.xmin)/self.dom_div,
                          minimizer_kwargs = args,
                          accept_test = self.obj_bounds
                          )
