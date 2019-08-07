@@ -4,7 +4,23 @@
 @date: 2018-10-18
 @name: test_agent.py
 
+-------------------------------------------------------------------------------
+Description:
+
 This file tests the agent class.
+
+The file creantes an agent using its location, the amount of neighbors that it 
+has, and the objective funtion that is being used ("ackley", "rosenbrock", 
+"styblinski-tang", and "sphere").
+The file prints out results for three sets of estimates.  
+ 
+-------------------------------------------------------------------------------
+Change Log:
+
+Date:       Author:    Description:
+2018-10-10  jmeluso    Initial version.
+
+-------------------------------------------------------------------------------
 """
 
 import model_agent as ag
@@ -13,7 +29,7 @@ import matplotlib.pylab as plt
 import doe_lhs as doe
 
 # Create an instance of an agent
-a1 = ag.Agent(2,[0,3],"ackley") 
+a1 = ag.Agent(2,[0,3],"sphere") 
 print(("Location = " + str(a1.location)))
 print(("Neighbors = " + str(a1.neighbors)))
 print(("Bound = " + str(a1.obj_bounds.xmax)))

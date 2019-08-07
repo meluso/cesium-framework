@@ -4,6 +4,9 @@
 @date: 2018-10-10
 @name: monte_carlo_mp.py
 
+-------------------------------------------------------------------------------
+Description:
+
 Performs a Monte Carlo simulation on a network of engineer agents. This
 model initializes and runs an instance of the system model, and sweeps the
 probability that an agent will use a specific estimate type. The model executes
@@ -11,6 +14,13 @@ probability that an agent will use a specific estimate type. The model executes
 simulations are performed asynchronously using the python multiprocessing
 module's pool and map_async functionality.
 
+-------------------------------------------------------------------------------
+Change Log:
+
+Date:       Author:    Description:
+2018-10-10  jmeluso    Initial version.
+
+-------------------------------------------------------------------------------
 """
 import model_system as sy
 import multiprocessing as mp
