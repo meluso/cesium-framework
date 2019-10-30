@@ -10,9 +10,9 @@ Description:
 This file contains a model of an agent in a system. It contains the definition
 of the class agent including its properties. Those properties include a
 selection of an objective function, definition of a current estimate, and the
-position of the agent in the system network. Both inputs are optional, and may
-be specified as follows below. Additional objective functions may be added to
-the code following the format of the existing functions.
+position of the agent in the system network. The location and neighbor options
+are required while the others are optional. Additional objective functions may 
+be added to the code following the format of the existing functions.
 Parameters:
     
     loc = [0,1,...,n-2,n-1]
@@ -26,18 +26,23 @@ Parameters:
         A string input which specifies the objective function the agent uses
         to evaluate the quality of a design. The input must be one of the
         following terms, specified with quotes:
-            "sphere"          - uses the sphere function as the objective,
+            "ackley"          - uses the Ackley function as the objective,
                                 which is also the default setting
-            "ackley"          - uses the Ackley function as the objective
+            "griewank"        - uses the Griewank function as objective
+            "langermann"      - uses the Langermann function as objective
+            "levy"            - uses the Levy function as objective
             "rosenbrock"      - uses the Rosenbrock function as the objective
+            "schwefel         - uses the Schwefel function as objective
+            "sphere"          - uses the sphere function as the objective
             "styblinski-tang" - uses the Styblinski-Tang function as objective
-    div = [1,inf)
-        A number which determines the step size of the basin-hopping algorithm.
-        The difference of the domain bounds is divided by this number to set
-        the step size. The value must be greater than or equal to 1, and the
-        default value is set to 10. 
+    tmp = (0.01, 50000]
+        A number which determines the cooling rate of the dual annealing
+        algorithm. The domain options are set by the algorithm. If the max
+        temperature isn't sufficient to cause the algorithm to move positions,
+        try reducing the scale of the objective function such that the max
+        value of the objective is no greater than the max temp value.
     itr = [1,2,...,inf)
-        The number of iterations that the basin-hopping algorithm will run per
+        The number of iterations that the annealing algorithm will run per
         execution. The default value is 1 to increase the difficulty of
         converging, but the value may be increased by integer values.
         
@@ -55,12 +60,22 @@ Date:       Author:    Description:
                        brent scalar minimization function.
 2019-06-19  jmeluso    Removed historical estimate code.
 2019-07-08  jmeluso    Added div and itr parameters for monte carlo testing.
+2019-10-24  jmeluso    Added the Griewank, Langermann, Levy, and Schwefel
+                       functions as objectives.
+2019-10-28  jmeluso    Replaced the stepsize parameter (limiting the max step
+                       size) with the temperature parameter (setting the
+                       cooling rate), setting the stepsize as constant to half
+                       the total domain of the design space.
+2019-10-30  jmeluso    Replace basin-hopping algorithm with dual annealing
+                       from scipy with only the general simulated annealing
+                       turned on to replicate the original simulated annealing
+                       concept.
 -------------------------------------------------------------------------------
 """
 
 # Import python packages
 import numpy as np
-from numpy import exp, cos, pi, sqrt, dot
+from numpy import exp, sin, cos, pi, sqrt, dot
 import scipy.optimize as opt
 
 
@@ -68,7 +83,7 @@ class Agent(object):
     '''Defines a class agent which designs an artifact in a system.'''
 
 
-    def __init__(self, loc, nbr, obj="ackley", div=10, itr=1):
+    def __init__(self, loc, nbr, obj="ackley", tmp=10, itr=1):
 
         '''Initializes an agent with all of its properties.'''
 
@@ -81,23 +96,34 @@ class Agent(object):
 
         self.fn = obj  # Specify the evaluating objective function
         
+        
         # Create the agent's objective
         self.objective = Objective(self.fn,self.neighbors)
 
         # Set decision variable boundaries
         if self.fn == "ackley":
-            #self.obj_bounds = Bounds(-32.768,32.768)
-            self.obj_bounds = Bounds(-5.00,5.00)
+            self.obj_bounds = Bounds(-32.768,32.768)
+            #self.obj_bounds = Bounds(-5.00,5.00)
+        elif self.fn == "griewank":
+            self.obj_bounds = Bounds(-600.00,600.00)
+        elif self.fn == "langermann":
+            self.obj_bounds = Bounds(0.00,10.00)
+        elif self.fn == "levy":
+            self.obj_bounds = Bounds(-10.00,10.00)
         elif self.fn == "rosenbrock":
             self.obj_bounds = Bounds(-5.00,10.00)
+        elif self.fn == "schwefel":
+            self.obj_bounds = Bounds(-500.00,500.00)
+        elif self.fn == "sphere":
+            self.obj_bounds = Bounds(-5.12,5.12)
         elif self.fn == "styblinski-tang":
             self.obj_bounds = Bounds(-5.00,5.00)
-        else:  # self.fn == "sphere" or none
-            self.obj_bounds = Bounds(-5.12,5.12)
+        else:
+            print("Input for 'obj' is not valid.")
         
         ##### Optimization Properties #####
-        
-        self.dom_div = div  # Num. of segments to divide the domain into
+
+        self.tmp = tmp  # Cooling rate for the basin-hopping algorithm
         self.iterations = itr  # Number of iterations for the optimization
         
         ##### Estimate Properties #####
@@ -170,20 +196,29 @@ class Agent(object):
         from neighbor agents. The function takes in the agent's own value (xi)
         and the neighbors vector (xj). Uses the basinhopping algorithm to
         optimize the objective function.'''
-            
-        # Define arguments for basin hopping minimization
-        args = {"method": "L-BFGS-B",
-                "bounds": [(self.obj_bounds.xmin,self.obj_bounds.xmax)],
-                "args": xj}
+        
+        # Define arguments for optimization
+        bound_lower = np.array([self.obj_bounds.xmin])
+        bound_upper = np.array([self.obj_bounds.xmax])
+        
+        # Define local search option dictionary
+        loc_search = {"method": "L-BFGS-B"}
 
         # Call the basin hopping minimization method
-        output = opt.basinhopping(func = self.objective,
-                         x0 = xi,
-                         niter = self.iterations,
-                         stepsize = (self.obj_bounds.xmax \
-                                     - self.obj_bounds.xmin)/self.dom_div,
-                         minimizer_kwargs = args,
-                         accept_test = self.obj_bounds
+        output = opt.dual_annealing(func = self.objective,
+                         bounds = list(zip(bound_lower,bound_upper)),
+                         x0 = [xi],
+                         args = tuple([xj]),
+                         maxiter = self.iterations,
+                         local_search_options = loc_search,
+                         initial_temp = self.tmp,
+                         # restart_temp_ratio = default,
+                         # visit = default,
+                         # accept = default,
+                         # maxfun = default,
+                         # seed = default,
+                         no_local_search = True,
+                         # callback = default,
                          )
         
         # Save the desired outputs in float format
@@ -233,8 +268,98 @@ class Objective:
 
             # Return the function evaluation
             result = root_term + cos_term + a + exp(1)
+            
+        elif self.fn == "griewank":
+            
+            # Build vector of all elements
+            vect = xj
+            vect.insert(0,xi)
+            
+            # Build the sum term
+            sum_term = 1
+            for v in vect:
+                sum_term = sum_term + v**2/4000
+            
+            # Build the product term
+            prod_term = 1
+            for r in range(0,len(vect)):
+                prod_term = prod_term*cos(vect[r]/sqrt(r+1))
+            
+            # Return the function evaluation
+            result = sum_term - prod_term
+            
+        elif self.fn == "langermann":
+            
+            # Set values of constants for the langermann function
+            a = [3, 5, 2, 1, 7]  # Location of the 5 minima
+            c = [-1,-2,-5,-2,-3]  # Amplitudes of the 5 minima         
+            
+            # Build vector of all elements
+            vect = xj
+            vect.insert(0,xi)
+            
+            # Initialize the sum of all elements
+            result = 0  # For the full product of c, exp, and cos
+            
+            # Iterate through the len(c) minima
+            for i in range(0,len(c)):
+                
+                sqr_sum = 0  # For the sum within the exponent
+                
+                # Iterate through the n dimensions of matrix A
+                for j in range(0,len(vect)):
+                    
+                    # Add element to square sum term
+                    sqr_sum = sqr_sum + (vect[j]-a[i])**2
+                    
+                # Combine into total sum
+                result = result + c[i] \
+                    * exp((-1/pi)*sqr_sum) * cos(pi*sqr_sum)
+            
+        elif self.fn == "levy":
+            
+            # Build vector of all elements
+            vect = xj
+            vect.insert(0,xi)
+            
+            # Initialize w(i) and the sum over all dimensions as result
+            w = [(1 + (x-1)/4) for x in vect]
+            result = (sin(pi*w[0]))**2 + \
+                (w[-1]-1)**2*(1+(sin(2*pi*w[-1]))**2)
+            
+            # Iteratively add sum elements to initial and final sum terms
+            for i in range(0,len(vect)-1):
+                result = result + \
+                    (w[i]-1)**2 * (1 + 10*(sin(pi*w[i]+1))**2)
         
-        elif self.fn == "styblinski-tang":
+        elif self.fn == "rosenbrock":
+            
+            # Build vector of all elements
+            vect = xj
+            vect.insert(0,xi)
+            
+            # Call scipy function for rosenbrock
+            result = opt.rosen(vect)
+            
+        elif self.fn == "schwefel":
+            
+            # Build vector of all elements
+            vect = xj
+            vect.insert(0,xi)
+            
+            # Initialize minimum
+            result = 0.4189829*len(vect)
+            
+            # Iteratively add elements to minimum elements
+            for x in vect:
+                result = result + x*sin(sqrt(abs(x)))
+            
+        elif self.fn == "sphere":
+
+            # Evaluate the sphere function
+            result = xi**2 + dot(xj,xj)
+            
+        else: #self.fn == "styblinski-tang"
             
             # Build the sums for function evaluation
             xi_term = xi**4 - 16*xi**2 + 5*xi
@@ -244,20 +369,6 @@ class Objective:
                 
             # Return the outcome
             result = 0.5*(xi_term + xj_term) + 39.166166*(self.k + 1)
-            
-        elif self.fn == "rosenbrock":
-            
-            # Build vector of all elements
-            vect = xj
-            vect.insert(0,xi)
-            
-            # Call scipy function for rosenbrock
-            result = opt.rosen(vect)
-
-        else:
-
-            # Evaluate the sphere function
-            result = xi**2 + dot(xj,xj)
 
         # Return the outcome
         return result

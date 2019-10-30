@@ -37,14 +37,13 @@ Parameters:
     con = (0,inf)
         The threshold for system convergence. The simulation terminates when
         the system objective evaluation is less than this value away from the
-        previous three objective evaluations.
-    div = [1,inf)
-        A number which determines the step size of the basin-hopping algorithm.
-        The difference of the domain bounds is divided by this number to set
-        the step size. The value must be greater than or equal to 1, and the
-        default value is set to 10. 
+        previous three objective evaluations and the number of evaluations is
+        greater than three.
+    tmp = (0.01, 50000]
+        A number which determines the cooling rate of the dual annealing
+        algorithm. The domain options are set by the algorithm.
     itr = [1,2,...,inf)
-        The number of iterations that the basin-hopping algorithm will run per
+        The number of iterations that the dual annealing algorithm will run per
         execution. The default value is 1 to increase the difficulty of
         converging, but the value may be increased by integer values.
 
@@ -64,6 +63,8 @@ Date:       Author:    Description:
                        objective evaluations are compared against the previous
                        three objective evaluations and must be within the
                        convergence threshold for all three before terminating.
+2019-10-30  jmeluso    Updated to reflect change from basin-hopping to dual
+                       annealing in model_agent.                       
                        
 -------------------------------------------------------------------------------
 """
@@ -79,14 +80,14 @@ class System(object):
     advancing the system from an initial to a final converged design.'''
 
     def __init__(self, n = 1000, obj = "sphere", edg = 2, tri = 0.5, con = 1,
-                 div = 10, itr = 1):
+                 tmp = 100, itr = 1):
         '''Initializes an instance of the system model.'''
         
         ##### Agent Properties #####
         
         self.obj_fn = obj  # The objective function used by the agents
-        self.int_div = div  # Number of intervals to divide obj domain into
-        self.iterations = itr  # Num of iterations for each basin-hopping run
+        self.temperature = tmp  # Cooling rate of the dual annealing algorithm
+        self.iterations = itr  # Num of iterations for each annealing run
         
         ##### Network Properties #####
         
@@ -150,10 +151,10 @@ class System(object):
             nbrs = np.sort([j for j in self.graph.adj[i]])
             
             # Create agent in system with specified inputs for its neighbors,
-            # probability of objective function, basin-hopping step size
-            # divisions, and basin-hopping iterations.
+            # probability of objective function, dual annealing cooling rate,
+            # and number of iterations.
             system.append(ag.Agent(i,nbrs,self.obj_fn,
-                                   self.int_div,self.iterations))
+                                   self.temperature,self.iterations))
             
         # Return the generated network of agents
         return system

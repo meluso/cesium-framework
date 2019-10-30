@@ -35,16 +35,16 @@ import datetime as dt
 t_start = dt.datetime.now()
 
 # Generate a system with n nodes, obj objective function, edg random edges,
-# tri probability of triange, con convergence threshold, div divisions for step
-# size, and itr iterations for basin-hopping
+# tri probability of triange, con convergence threshold, tmp for cooling rate,
+# and itr iterations for basin-hopping
 n = 100
-obj = "ackley"
+obj = "levy"
 edg = 2
 tri = 0.5
 con = 1
-div = 10
+tmp = 10000
 itr = 1
-s1 = sy.System(n,obj,edg,tri,con,div,itr) 
+s1 = sy.System(n,obj,edg,tri,con,tmp,itr) 
 
 # Plot the system
 options = {
