@@ -33,7 +33,7 @@ iterations = 25
 
 # Create an instance of an agent
 index = 2
-a1 = ag.Agent(loc=index,nbr=[0,3],obj="levy",tmp=1000,itr=1) 
+a1 = ag.Agent(loc=index,nbr=[0,3],obj="levy",tmp=1000,crt=2.62) 
 print(("Location = " + str(a1.location)))
 print(("Neighbors = " + str(a1.neighbors)))
 print(("Min Bound = " + str(a1.obj_bounds.xmin)))

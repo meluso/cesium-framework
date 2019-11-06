@@ -42,6 +42,10 @@ Parameters:
     tmp = (0.01, 50000]
         A number which determines the cooling rate of the dual annealing
         algorithm. The domain options are set by the algorithm.
+    crt = (0,3]
+        The cooling rate of the algorithm, which sets how quickly the
+        probability distribution of sampling further-off points contracts.
+        The domain options are set by the algorithm.
     itr = [1,2,...,inf)
         The number of iterations that the dual annealing algorithm will run per
         execution. The default value is 1 to increase the difficulty of
@@ -64,7 +68,9 @@ Date:       Author:    Description:
                        three objective evaluations and must be within the
                        convergence threshold for all three before terminating.
 2019-10-30  jmeluso    Updated to reflect change from basin-hopping to dual
-                       annealing in model_agent.                       
+                       annealing in model_agent.
+2019-11-04  jmeluso    Differentiated between simulated annealing cooling rate
+                       (visit parameter) and initial temperature.
                        
 -------------------------------------------------------------------------------
 """

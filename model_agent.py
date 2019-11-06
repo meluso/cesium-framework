@@ -36,11 +36,15 @@ Parameters:
             "sphere"          - uses the sphere function as the objective
             "styblinski-tang" - uses the Styblinski-Tang function as objective
     tmp = (0.01, 50000]
-        A number which determines the cooling rate of the dual annealing
+        A number which determines the initial temperature of the dual annealing
         algorithm. The domain options are set by the algorithm. If the max
         temperature isn't sufficient to cause the algorithm to move positions,
         try reducing the scale of the objective function such that the max
         value of the objective is no greater than the max temp value.
+    crt = (0,3]
+        The cooling rate of the algorithm, which sets how quickly the
+        probability distribution of sampling further-off points contracts.
+        The domain options are set by the algorithm.
     itr = [1,2,...,inf)
         The number of iterations that the annealing algorithm will run per
         execution. The default value is 1 to increase the difficulty of
@@ -70,6 +74,9 @@ Date:       Author:    Description:
                        from scipy with only the general simulated annealing
                        turned on to replicate the original simulated annealing
                        concept.
+2019-11-04  jmeluso    Differentiated between simulated annealing cooling rate
+                       (visit parameter) and initial temperature.
+                       
 -------------------------------------------------------------------------------
 """
 
@@ -83,7 +90,7 @@ class Agent(object):
     '''Defines a class agent which designs an artifact in a system.'''
 
 
-    def __init__(self, loc, nbr, obj="ackley", tmp=10, itr=1):
+    def __init__(self, loc, nbr, obj="ackley", tmp=10, crt=2.62, itr=1):
 
         '''Initializes an agent with all of its properties.'''
 
@@ -103,7 +110,6 @@ class Agent(object):
         # Set decision variable boundaries
         if self.fn == "ackley":
             self.obj_bounds = Bounds(-32.768,32.768)
-            #self.obj_bounds = Bounds(-5.00,5.00)
         elif self.fn == "griewank":
             self.obj_bounds = Bounds(-600.00,600.00)
         elif self.fn == "langermann":
@@ -123,7 +129,8 @@ class Agent(object):
         
         ##### Optimization Properties #####
 
-        self.tmp = tmp  # Cooling rate for the basin-hopping algorithm
+        self.tmp = tmp  # Initial temperature for the annealing algorithm
+        self.cooling = crt  # Cooling rate for the annealing algorithm
         self.iterations = itr  # Number of iterations for the optimization
         
         ##### Estimate Properties #####
@@ -213,7 +220,7 @@ class Agent(object):
                          local_search_options = loc_search,
                          initial_temp = self.tmp,
                          # restart_temp_ratio = default,
-                         # visit = default,
+                         visit = self.cooling,
                          # accept = default,
                          # maxfun = default,
                          # seed = default,
@@ -348,11 +355,14 @@ class Objective:
             vect.insert(0,xi)
             
             # Initialize minimum
-            result = 0.4189829*len(vect)
+            result = 418.9829*len(vect)
             
             # Iteratively add elements to minimum elements
             for x in vect:
                 result = result + x*sin(sqrt(abs(x)))
+            
+            # Scale function down
+            result = result/1000
             
         elif self.fn == "sphere":
 
