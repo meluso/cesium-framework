@@ -13,22 +13,23 @@ Description:
     to that agent. The user is given the option to see every estimate that was 
     generated at the start. 
 
+
 _______________________________________________________________________________
+
 """
 import model_agent as ag
-from numpy.random import random_sample as rand
-#import plotly.graph_objects as go 
-#import networkx as nx 
+from numpy.random import random_sample as rand 
 import matplotlib.pyplot as plt
 
+#Gives the user the option to see that plots for all 5 agents
+figure = input("Would you like to see the plots for all 5 agents? (y/n):\n")
 
-#This script aims to test all of the functions that are present in the script model_agent
-# as well as plot the agent properties in a series of 3 plots: .... 
+# Gives the user the option to view all of the estimates that were generated 
+# during the optimization - the anount of estimates generated is equal to the
+# number of iterations that the agent has
+estimates = input("Would you like to see all of the estimates generated during optimization? (y/n):\n")
 
-figure = input("Would you like to see the plots for all 5 agents? (Y/N):\n")
-
-estimates = input("Would you like to see all of the estimates generated during optimization? (Y/N):\n")
-
+print("____________________________________________________________")
 '''Agent 1'''
 #Test the function agent by creating an instance of an agent and give it a 
 #location, neighbors, an objective function, iterations and domain divisions.
@@ -78,9 +79,10 @@ for i in range(0,itr1):
                                                     #is not giving a number
 
 #Test to see if the initial estimate values are within the bounds of the objective function
-    print ("Agent One Estimate Input (x): " + str(agent1.curr_est.x)) 
-    print ("Agent One Estimate Output (fx): " + str(agent1.curr_est.fx))
-    print ("    ")
+    if estimates == "y":
+        print ("Agent One Estimate Input (x): " + str(agent1.curr_est.x)) 
+        print ("Agent One Estimate Output (fx): " + str(agent1.curr_est.fx))
+        print ("    ")
 
 print ("Minimum value obtained for fx: " + str(min(fx_val1)))
 minfx = min(fx_val1)
@@ -93,7 +95,7 @@ for i in x_val1:
    
             #can this be printed out once - or make it only print for errors?
 
-if figure == "Y":
+if figure == "y":
 #How f_x changes over time 
     plt.plot(fx_val1) 
     plt.show()
@@ -102,7 +104,7 @@ if figure == "Y":
 
 print ("   ") ##Provides a break between the agents that are being printed
 
-
+print("____________________________________________________________")
 '''Agent 2'''
 #Creating A Second Agent
 print("Second Agent")
@@ -150,7 +152,7 @@ for i in range(0,itr2):
     fx_val2.append(agent2.curr_est.fx)
     received_est2 = agent2.generate_estimate(sys_vect2)
 
-    if estimates == "Y":    
+    if estimates == "y":    
   
         print ("Agent Two Estimate Input (x): " + str(agent2.curr_est.x)) 
         print ("Agent Two Estimate Output (fx): " + str(agent2.curr_est.fx))
@@ -160,7 +162,7 @@ print ("Minimum value obtained for fx: " + str(min(fx_val2)))
 minfx2 = min(fx_val2)
 fxmindex2 = fx_val2.index(min(fx_val2)) 
 
-if figure == "Y":
+if figure == "y":
     plt.plot(fx_val2) 
     plt.show()
 
@@ -169,7 +171,7 @@ if figure == "Y":
 
 print("    ")
 
-
+print("____________________________________________________________")
 '''Agent 3'''
 #Creating A Third Agent
 print("Third Agent")
@@ -226,7 +228,7 @@ for i in range(0,itr3):
     fx_val3.append(agent3.curr_est.fx) 
     received_est3 = agent3.generate_estimate(sys_vect3)
     
-    if estimates == "Y":    
+    if estimates == "y":    
   
         print ("Agent Three Estimate Input (x): " + str(agent2.curr_est.x)) 
         print ("Agent Three Estimate Output (fx): " + str(agent2.curr_est.fx))
@@ -237,7 +239,7 @@ print ("Minimum value obtained for fx: " + str(min(fx_val3)))
 minfx3 = min(fx_val3)
 fxmindex3 = fx_val3.index(min(fx_val3)) 
 
-if figure == "Y":
+if figure == "y":
     plt.plot(fx_val3) 
     plt.show()
 
@@ -246,7 +248,7 @@ if figure == "Y":
 
 print("    ")
 
-
+print("____________________________________________________________")
 '''Agent 4'''
 #Creating A Fourth Agent
 print("Fourth Agent")
@@ -297,15 +299,17 @@ for i in range(0, itr4):
     received_est1 = agent1.generate_estimate(sys_vect1)
     
     print("  ")
-    print ("Initial Agent Four Estimate Input (x): " + str(agent4.curr_est.x))
-    print ("Agent Four Estimate Output (fx): " + str(agent4.curr_est.fx))
-    print("    ")
+    
+    if estimates == "y":
+        print ("Initial Agent Four Estimate Input (x): " + str(agent4.curr_est.x))
+        print ("Agent Four Estimate Output (fx): " + str(agent4.curr_est.fx))
+        print("    ")
 
 print ("Minimum value obtained for fx: " + str(min(fx_val4)))
 minfx4 = min(fx_val4)
 fxmindex4 = fx_val4.index(min(fx_val4))
 
-if figure == "Y":
+if figure == "y":
     plt.plot(fx_val4) 
     plt.show()
 
@@ -314,6 +318,7 @@ if figure == "Y":
 
 print("    ")
 
+print("____________________________________________________________")
 '''Agent 5'''
 #Creating A Fifth Agent
 print("Fifth Agent")
@@ -393,9 +398,11 @@ for i in range(0,itr5):
     received_est5 = agent5.generate_estimate(sys_vect5)
 
     print("  ")
-    print ("Initial Agent Five Estimate Input (x): " + str(agent5.curr_est.x))
-    print ("Agent Five Estimate Output (fx): " + str(agent5.curr_est.fx))
-    print("    ")
+    
+    if estimates == "y":
+        print ("Initial Agent Five Estimate Input (x): " + str(agent5.curr_est.x))
+        print ("Agent Five Estimate Output (fx): " + str(agent5.curr_est.fx))
+        print("    ")
     
 print("     ")
 
@@ -403,38 +410,21 @@ print ("Minimum value obtained for fx: " + str(min(fx_val5)))
 minfx5 = min(fx_val5)
 fxmindex5 = fx_val5.index(min(fx_val5))
 
-if figure == "Y":
+if figure == "y":
     plt.plot(fx_val5) 
     plt.show()
 
     plt.scatter(x_val5,fx_val5)
     plt.show()
 
-
-### This part of the code will test the different fucntions in model_agent
-### using the five agents that have been created above 
-#print("     ")
-####Smaller tests for each agent 
-#    print ("The estimate for agent one is within the Bounds")
-#else:
- #   print ("The Estimate for agent one is outside of the Bounds")
-    
-#print ("    ")
-
+print("____________________________________________________________")
 #Was the estimate of the agent changed to a better # or no??
 #if agent1.curr_est.x == received_est1: 
  #   print("The initial estimate for agent one has not changed")
 #else:
   #  print("The estimate for agent one has changed") # from" +str(fx_val1.index(0)))
 
-#print ("    ")
 
-##STOPS WORKING BELOW##
-#Are the values that are given to xi and xj reasonable ? 
-#if agent1.curr_est.x == ag.xi:
- #   print ("xi holds the correct estimate value for the agent")
-#else:
- #   print ("xi is incorrect")
     
 print ("    ")
 
