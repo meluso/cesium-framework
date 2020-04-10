@@ -11,7 +11,7 @@ Description:
     properties. The agents all obtain an initial estimate. The estimate is then 
     optimized usiing dual annealing and based in the objective function given 
     to that agent. The user is given the option to see every estimate that was 
-    generated at the start. 
+    generated at the start. /
 
 
 _______________________________________________________________________________
@@ -42,6 +42,7 @@ print ("Agent One Objective Function: " + str(agent1.fn))
 print ("Max Bound: " + str(agent1.obj_bounds.xmax))
 print ("Min Bound: " + str(agent1.obj_bounds.xmin))
 print ("Agent One Iterations: " + str(agent1.iterations))
+print ("   ")
 x_val1 = []
 fx_val1 = [] 
 #Create the estimate for the agent
@@ -59,14 +60,14 @@ agent1.initialize_evaluations(obj_vect1)
 x_val1.append(agent1.curr_est.x) ###adding the agent's estimate to sys_vect1
 fx_val1.append(agent1.curr_est.fx)
 
-
 for i in range(0,itr1):     
 
-    sys_vect1 = [ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand())]
+    sys_vect1 =[ag.Obj_Eval(rand()*(agent1.obj_bounds.xmax-agent1.obj_bounds.xmin)+agent1.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent1.obj_bounds.xmax-agent1.obj_bounds.xmin)+agent1.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent1.obj_bounds.xmax-agent1.obj_bounds.xmin)+agent1.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent1.obj_bounds.xmax-agent1.obj_bounds.xmin)+agent1.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent1.obj_bounds.xmax-agent1.obj_bounds.xmin)+agent1.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent1.obj_bounds.xmax-agent1.obj_bounds.xmin)+agent1.obj_bounds.xmin,0)]
     
     agent1.initialize_estimates()
 
@@ -75,16 +76,15 @@ for i in range(0,itr1):
 ##use initialize_evaluations to create an fx value for the agent's current x value
     fx_val1.append(agent1.curr_est.fx)
 
-    received_est1 = agent1.generate_estimate(sys_vect1) #* needs to be fixed b/c it
-                                                    #is not giving a number
+    received_est1 = agent1.generate_estimate(sys_vect1)
 
-#Test to see if the initial estimate values are within the bounds of the objective function
+#prints out every estimate that was created for the agent during optimization
     if estimates == "y":
         print ("Agent One Estimate Input (x): " + str(agent1.curr_est.x)) 
         print ("Agent One Estimate Output (fx): " + str(agent1.curr_est.fx))
         print ("    ")
 
-print ("Minimum value obtained for fx: " + str(min(fx_val1)))
+print ("Minimum value obtained of fx for Agent 1: " + str(min(fx_val1)))
 minfx = min(fx_val1)
 fxmindex = fx_val1.index(min(fx_val1)) 
 #xmindex = x_val1.index(fxmindex) #currently looks for the value in the vector and gives the index that corresponds to that values
@@ -115,6 +115,7 @@ print ("Agent Two Objective Function: " + str(agent2.fn))
 print ("Max Bound: " + str(agent2.obj_bounds.xmax))
 print ("Min Bound: " + str(agent2.obj_bounds.xmin))
 print ("Agent Two Iterations: " + str(agent2.iterations))
+print (" ")
 x_val2 = []
 fx_val2 = [] 
 
@@ -138,27 +139,27 @@ fx_val2.append(agent2.curr_est.fx)
 
 for i in range(0,itr2): 
     
-    sys_vect2 = [ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand())]
+    sys_vect2 =[ag.Obj_Eval(rand()*(agent2.obj_bounds.xmax-agent2.obj_bounds.xmin)+agent2.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent2.obj_bounds.xmax-agent2.obj_bounds.xmin)+agent2.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent2.obj_bounds.xmax-agent2.obj_bounds.xmin)+agent2.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent2.obj_bounds.xmax-agent2.obj_bounds.xmin)+agent2.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent2.obj_bounds.xmax-agent2.obj_bounds.xmin)+agent2.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent2.obj_bounds.xmax-agent2.obj_bounds.xmin)+agent2.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent2.obj_bounds.xmax-agent2.obj_bounds.xmin)+agent2.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent2.obj_bounds.xmax-agent2.obj_bounds.xmin)+agent2.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent2.obj_bounds.xmax-agent2.obj_bounds.xmin)+agent2.obj_bounds.xmin,0)]
     
     x_val2.append(agent2.curr_est.x)
     fx_val2.append(agent2.curr_est.fx)
     received_est2 = agent2.generate_estimate(sys_vect2)
 
     if estimates == "y":    
-  
+  #prints every estimate created for agent 2
         print ("Agent Two Estimate Input (x): " + str(agent2.curr_est.x)) 
         print ("Agent Two Estimate Output (fx): " + str(agent2.curr_est.fx))
         print ("    ")
     
-print ("Minimum value obtained for fx: " + str(min(fx_val2)))
+print ("Minimum value obtained of fx for Agent 2: " + str(min(fx_val2)))
 minfx2 = min(fx_val2)
 fxmindex2 = fx_val2.index(min(fx_val2)) 
 
@@ -172,6 +173,7 @@ if figure == "y":
 print("    ")
 
 print("____________________________________________________________")
+
 '''Agent 3'''
 #Creating A Third Agent
 print("Third Agent")
@@ -181,8 +183,9 @@ print ("Agent Three Neighbors: " + str(agent3.neighbors))
 print ("Agent Three Objective Function: " + str(agent3.fn))
 print ("Max Bound: " + str(agent3.obj_bounds.xmax))
 print ("Min Bound: " + str(agent3.obj_bounds.xmin))
-#print ("Domain Division " + str(agent3.dom_div))
 print ("Agent Three Iterations: " + str(agent3.iterations))
+print (" ")
+
 x_val3 = []
 fx_val3 = [] 
 agent3.initialize_estimates()
@@ -209,19 +212,19 @@ fx_val3.append(agent3.curr_est.fx)
 
 for i in range(0,itr3):
 
-    sys_vect3 = [ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand())]
+    sys_vect3 =[ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent3.obj_bounds.xmax-agent3.obj_bounds.xmin)+agent3.obj_bounds.xmin,0)]
     
     agent3.initialize_estimates()
     x_val3.append(agent3.curr_est.x)
@@ -235,7 +238,7 @@ for i in range(0,itr3):
         print ("    ")
 
 
-print ("Minimum value obtained for fx: " + str(min(fx_val3)))
+print ("Minimum value obtained of fx for Agent 3: " + str(min(fx_val3)))
 minfx3 = min(fx_val3)
 fxmindex3 = fx_val3.index(min(fx_val3)) 
 
@@ -252,13 +255,15 @@ print("____________________________________________________________")
 '''Agent 4'''
 #Creating A Fourth Agent
 print("Fourth Agent")
-agent4 =  ag.Agent(9,[1,4,6,7,9],"schwefel",1000,2.62,16)
+agent4 =  ag.Agent(9,[1,4,6,7,9],"ackley",1000,2.62,26)
 print ("Agent Four Location: " + str(agent4.location)) 
 print ("Agent Four Neighbors: " + str(agent4.neighbors))
 print ("Agent Four Objective Function: " + str(agent4.fn))
 print ("Max Bound: " + str(agent4.obj_bounds.xmax))
 print ("Min Bound: " + str(agent4.obj_bounds.xmin))
 print ("Agent Four Iterations: " + str(agent4.iterations))
+print (" ")
+
 x_val4 = []
 fx_val4 = [] 
 agent4.initialize_estimates()
@@ -282,30 +287,27 @@ fx_val4.append(agent4.curr_est.fx)
 
 for i in range(0, itr4): 
 
-    sys_vect4 =[ag.Obj_Eval(rand(),rand()),
-                ag.Obj_Eval(rand(),rand()),
-                ag.Obj_Eval(rand(),rand()),
-                ag.Obj_Eval(rand(),rand()),
-                ag.Obj_Eval(rand(),rand()),
-                ag.Obj_Eval(rand(),rand()),
-                ag.Obj_Eval(rand(),rand()),
-                ag.Obj_Eval(rand(),rand()),
-                ag.Obj_Eval(rand(),rand()),
-                ag.Obj_Eval(rand(),rand())]
+    sys_vect4 =[ag.Obj_Eval(rand()*(agent4.obj_bounds.xmax-agent4.obj_bounds.xmin)+agent4.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent4.obj_bounds.xmax-agent4.obj_bounds.xmin)+agent4.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent4.obj_bounds.xmax-agent4.obj_bounds.xmin)+agent4.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent4.obj_bounds.xmax-agent4.obj_bounds.xmin)+agent4.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent4.obj_bounds.xmax-agent4.obj_bounds.xmin)+agent4.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent4.obj_bounds.xmax-agent4.obj_bounds.xmin)+agent4.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent4.obj_bounds.xmax-agent4.obj_bounds.xmin)+agent4.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent4.obj_bounds.xmax-agent4.obj_bounds.xmin)+agent4.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent4.obj_bounds.xmax-agent4.obj_bounds.xmin)+agent4.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent4.obj_bounds.xmax-agent4.obj_bounds.xmin)+agent4.obj_bounds.xmin,0)]
 
     agent4.initialize_estimates()
     x_val4.append(agent4.curr_est.x)
     fx_val4.append(agent4.curr_est.fx)
-    received_est1 = agent1.generate_estimate(sys_vect1)
-    
-    print("  ")
-    
+    received_est4 = agent4.generate_estimate(sys_vect4)
+        
     if estimates == "y":
         print ("Initial Agent Four Estimate Input (x): " + str(agent4.curr_est.x))
         print ("Agent Four Estimate Output (fx): " + str(agent4.curr_est.fx))
-        print("    ")
 
-print ("Minimum value obtained for fx: " + str(min(fx_val4)))
+print ("Minimum value obtained of fx for Agent 4: " + str(min(fx_val4)))
 minfx4 = min(fx_val4)
 fxmindex4 = fx_val4.index(min(fx_val4))
 
@@ -329,6 +331,8 @@ print ("Agent Five Objective Function: " + str(agent4.fn))
 print ("Max Bound: " + str(agent5.obj_bounds.xmax))
 print ("Min Bound: " + str(agent5.obj_bounds.xmin))
 print ("Agent Five Iterations: " + str(agent5.iterations))
+print (" ")
+
 x_val5 = []
 fx_val5 = [] 
 agent5.initialize_estimates()
@@ -367,37 +371,35 @@ fx_val1.append(agent5.curr_est.fx)
 
 for i in range(0,itr5):
 
-    sys_vect5 = [ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand()),
-                 ag.Obj_Eval(rand(),rand())]
+    sys_vect5 =[ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0),
+                ag.Obj_Eval(rand()*(agent5.obj_bounds.xmax-agent5.obj_bounds.xmin)+agent5.obj_bounds.xmin,0)]
     
     agent5.initialize_estimates()
     x_val5.append(agent5.curr_est.x)
     fx_val5.append(agent5.curr_est.fx) 
     received_est5 = agent5.generate_estimate(sys_vect5)
-
-    print("  ")
     
     if estimates == "y":
         print ("Initial Agent Five Estimate Input (x): " + str(agent5.curr_est.x))
@@ -406,7 +408,7 @@ for i in range(0,itr5):
     
 print("     ")
 
-print ("Minimum value obtained for fx: " + str(min(fx_val5)))
+print ("Minimum value obtained of fx for Agent 5: " + str(min(fx_val5)))
 minfx5 = min(fx_val5)
 fxmindex5 = fx_val5.index(min(fx_val5))
 
@@ -418,28 +420,215 @@ if figure == "y":
     plt.show()
 
 print("____________________________________________________________")
-#Was the estimate of the agent changed to a better # or no??
-#if agent1.curr_est.x == received_est1: 
- #   print("The initial estimate for agent one has not changed")
-#else:
-  #  print("The estimate for agent one has changed") # from" +str(fx_val1.index(0)))
-
 
     
 print ("    ")
+## Has the agent failed or passed the test? - How many have they failed?
+#### Starting with a counter -- How mant passed how many fail
 
-### Is there a estimate value for each of the neighbors ? ---> doesn't matter
-#if len(agent1.neighbors) == len(ag.xj):
- #   print ("The number of neighbors matches the number of values in xj")
-#else:
- #   print ("There are not enough values on xj to correspond with the amount of neighbors")
+#objective funtions bounds
+ackley_min = -32.768
+ackley_max = 32.768
+griewank_min = -600.00
+griewank_max = 600.00
+langermann_min = 0.00
+langermann_max = 10.00
+levy_min = -10.00
+levy_max = 10.00
+rosenbrock_min = -5.00
+rosenbrock_max = 10.00
+schwefel_min = -500.00
+schwefel_max = 500.00
+sphere_min = -5.12
+sphere_max = 5.12
+styblinskitang_min = -5
+styblinskitang_max = 5
+
+pass_count1 = 0 
+fail_count1 = 0
+
+if agent1.obj_bounds.xmin == sphere_min and agent1.obj_bounds.xmax == sphere_max:
+    pass_count1 += 1
+else:
+    fail_count1 += 1
+    print ("The agent is not using the correct function bounds")
+
+if  fx_val1[0] > minfx:
+    pass_count1 +=1
+else:
+    fail_count1 += 1
+    print ("Agent 1 was not optimzed")
     
-#print ("    ")
-
+for i in x_val1:
+    if all(x_val1) < agent1.obj_bounds.xmax and all(x_val1) > agent1.obj_bounds.xmin: 
+             bounds_check1 = 'true' 
+    else:
+        bounds_check1 ='false'
+        print ("The estimation inputs are not within the objective function bound")
+if bounds_check1 == 'true':
+    pass_count1 +=1
+else:
+    fail_count1 +=1
+    
+if len(x_val1) == len(fx_val1): #checks if the number out inputs and outputs match
+    pass_count1 +=1
+else:
+    fail_count1 +=1
+    print ("The number of outputs does not match the number of outputs")
 
     
- ###Is the init function under class obejctive receiving the correct data and is it giving the correct degree   
-# if    
+print ("Amount of Tests Agent 1 has passed = " + str(pass_count1))
+print ("Amount of Tests Agent 1 has failed = " + str(fail_count1))
+ ##
+print (" ")
+pass_count2 = 0 
+fail_count2 = 0
+
+if agent2.obj_bounds.xmin == ackley_min and agent2.obj_bounds.xmax == ackley_max:
+    pass_count2 += 1
+else:
+    fail_count2 += 1
+    print ("The agent is not using the correct function bounds")
+
+if  fx_val2[0] > minfx2:
+    pass_count2 +=1
+else:
+    fail_count2 += 1
+    print ("Agent 2 was not optimzed")
+    
+for i in x_val2:
+    if all(x_val2) < agent2.obj_bounds.xmax and all(x_val2) > agent2.obj_bounds.xmin: 
+             bounds_check2 = 'true' 
+    else:
+        bounds_check2 ='false'
+        print ("The estimation inputs are not within the objective function bound")
+if bounds_check2 == 'true':
+    pass_count2 +=1
+else:
+    fail_count2 +=1
+
+if len(x_val2) == len(fx_val2): #checks if the number out inputs and outputs match
+    pass_count2 +=1
+else:
+    fail_count2 +=1
+    print ("The number of outputs does not match the number of outputs")
+
+    
+print ("Amount of Tests Agent 2 has passed = " + str(pass_count2))
+print ("Amount of Tests Agent 2 has failed = " + str(fail_count2))
+
+print(" ")
+pass_count3 = 0 
+fail_count3 = 0
+
+if agent3.obj_bounds.xmin == rosenbrock_min and agent3.obj_bounds.xmax == rosenbrock_max:
+    pass_count3 += 1
+else:
+    fail_count3 += 1
+    print ("The agent is not using the correct function bounds")
+
+if  fx_val3[0] > minfx3:
+    pass_count3 +=1
+else:
+    fail_count3 += 1
+    print ("The Agent was not optimzed")
+    
+for i in x_val3:
+    if all(x_val3) < agent3.obj_bounds.xmax and all(x_val3) > agent3.obj_bounds.xmin: 
+             bounds_check3 = 'true' 
+    else:
+        bounds_check3 ='false'
+        print ("The estimation inputs are not within the objective function bound")
+if bounds_check3 == 'true':
+    pass_count3 +=1
+else:
+    fail_count3 +=1
+
+if len(x_val3) == len(fx_val3): #checks if the number out inputs and outputs match
+    pass_count3 +=1
+else:
+    fail_count3 +=1
+    print ("The number of outputs does not match the number of outputs")
+    
+print ("Amount of Tests Agent 3 has passed = " + str(pass_count3))
+print ("Amount of Tests Agent 3 has failed = " + str(fail_count3))
+print(" ")
+
+
+pass_count4 = 0 
+fail_count4 = 0
+
+if agent4.obj_bounds.xmin == ackley_min and agent4.obj_bounds.xmax == ackley_max:
+    pass_count4 += 1
+else:
+    fail_count4 += 1
+    print ("The agent is not using the correct function bounds")
+
+if  fx_val4[0] > minfx4:
+    pass_count4 +=1
+else:
+    fail_count4 += 1
+    print ("Agent 4 was not optimzed")
+    
+for i in x_val4:
+    if all(x_val4) < agent4.obj_bounds.xmax and all(x_val4) > agent4.obj_bounds.xmin: 
+             bounds_check4 = 'true' 
+    else:
+        bounds_check4 ='false'
+        print ("The estimation inputs are not within the objective function bound")
+if bounds_check4 == 'true':
+    pass_count4 +=1
+else:
+    fail_count4 +=1
+
+if len(x_val4) == len(fx_val4): #checks if the number out inputs and outputs match
+    pass_count4 +=1
+else:
+    fail_count4 +=1
+    print ("The number of outputs does not match the number of outputs")
+    
+print ("Amount of Tests Agent 4 has passed = " + str(pass_count4))
+print ("Amount of Tests Agent 4 has failed = " + str(fail_count4))
+print(" ")
+ 
+pass_count5 = 0 
+fail_count5 = 0
+
+if agent5.obj_bounds.xmin == styblinskitang_min and agent5.obj_bounds.xmax == styblinskitang_max:
+    pass_count5 += 1
+else:
+    fail_count5 += 1
+    print ("The agent is not using the correct function bounds")
+
+if  fx_val5[0] > minfx5:
+    pass_count5 +=1
+else:
+    fail_count5 += 1
+    print ("Agent 5 was not optimzed")
+    
+for i in x_val5:
+    if all(x_val5) < agent5.obj_bounds.xmax and all(x_val5) > agent5.obj_bounds.xmin: 
+             bounds_check5 = 'true' 
+    else:
+        bounds_check5 ='false'
+        print ("The estimation inputs are not within the objective function bound")
+if bounds_check5 == 'true':
+    pass_count5 +=1
+else:
+    fail_count5 +=1
+    
+if len(x_val5) == len(fx_val5): #checks if the number out inputs and outputs match
+    pass_count5 +=1
+else:
+    fail_count5 +=1
+    print ("The number of outputs does not match the number of outputs")
+
+    
+print ("Amount of Tests Agent 5 has passed = " + str(pass_count5))
+print ("Amount of Tests Agent 5 has failed = " + str(fail_count5))
  
  
-print ("    ")
+
+
+ 
+ 
