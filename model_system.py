@@ -32,24 +32,37 @@ Parameters:
     edg = [1,2,...,n]
         The number of random edges created for each new node added to the
         network during system generation.
-    tri =  [0,1]
+    tri = [0,1]
         Probability of adding a triangle after adding a random edge.
     con = (0,inf)
         The threshold for system convergence. The simulation terminates when
         the system objective evaluation is less than this value away from the
         previous three objective evaluations and the number of evaluations is
         greater than three.
+    cyc = (1,inf)
+        The maximum number of design cycles the system will undergo before
+        stopping.
     tmp = (0.01, 50000]
-        A number which determines the cooling rate of the dual annealing
+        A number which determines the initial temp of the dual annealing
         algorithm. The domain options are set by the algorithm.
-    crt = (0,3]
-        The cooling rate of the algorithm, which sets how quickly the
-        probability distribution of sampling further-off points contracts.
-        The domain options are set by the algorithm.
     itr = [1,2,...,inf)
         The number of iterations that the dual annealing algorithm will run per
         execution. The default value is 1 to increase the difficulty of
         converging, but the value may be increased by integer values.
+	mthd = {"","future"}
+		Estimate method used by agents. If the value is set to anything other
+		than "future" (e.g. ""), the agent will use only current values of
+		their designs. If the method is "future", it allows for agents to use
+		either current estimates or future predictsion with a probability
+		specified by parameter p.
+	p = [0,1]
+		The probability of a node using a specified estimate method. If the
+	    method is "", then all agents use current estimates only. If the method
+		is "future", then the probability p is used.
+    crt = (0,3]
+        The cooling rate of the algorithm, which sets how quickly the
+        probability distribution of sampling further-off points contracts.
+        The domain options are set by the algorithm.
 
 -------------------------------------------------------------------------------
 Change Log:
@@ -71,6 +84,9 @@ Date:       Author:    Description:
                        annealing in model_agent.
 2019-11-04  jmeluso    Differentiated between simulated annealing cooling rate
                        (visit parameter) and initial temperature.
+2020-09-24  jmeluso    Reinstituted multiple estimate types with associated
+                       parameters from original miscommunication model as
+					   method of type "future".
                        
 -------------------------------------------------------------------------------
 """
@@ -79,6 +95,7 @@ Date:       Author:    Description:
 from networkx.generators.random_graphs import powerlaw_cluster_graph as gen
 import numpy as np
 import model_agent as ag
+import doe_lhs as doe
 
 class System(object):
     '''Defines a class system which contains a specified number of agents that
@@ -86,32 +103,38 @@ class System(object):
     advancing the system from an initial to a final converged design.'''
 
     def __init__(self, n = 1000, obj = "sphere", edg = 2, tri = 0.5, con = 1,
-                 tmp = 100, itr = 1):
+         cyc = 100, tmp = 100, itr = 1, mthd = "", p = 0, crt = 2.62):
         '''Initializes an instance of the system model.'''
         
-        ##### Agent Properties #####
-        
+        # Agent Properties
         self.obj_fn = obj  # The objective function used by the agents
-        self.temperature = tmp  # Cooling rate of the dual annealing algorithm
+        self.temperature = tmp  # Initial temp of the dual annealing algorithm
         self.iterations = itr  # Num of iterations for each annealing run
+        self.mthd = mthd  # Initialize the type of estimates being made
+        self.crt = crt  # Cooling rate of the dual annealing algorithm
+        self.cyc = cyc  # Max number of design cycles
         
-        ##### Network Properties #####
-        
+        # Network Properties
         self.n = n  # The number of agents in the network
         self.new_edges = edg  # The number of edges created with each new node
         self.tri = tri # The probability of a new edge creating a triangle
+        self.p = p  # The probability of a node using an estimate type
+        
+        # System Properties
+        self.s = 101  # The number of hypercube sampling partitions
+        self.conv_lim = con  # System convergence limit
         
         # Generate the network using generate_network
         self.system = self.generate_network()
-        
-        ##### System Properties #####
-        
-        self.conv_lim = con  # System convergence limit
         
         # Vector (old and new) of the agents' returned values
         self.vect = [ag.Obj_Eval() for i in range(n)]
         self.vect_new = [ag.Obj_Eval() for i in range(n)]
         
+		# Generate the system history if needed
+        if self.mthd == "future":
+            self.generate_history()
+			
         for i in range(len(self.system)):
             
             # Initialize the agent's estimate
@@ -159,11 +182,46 @@ class System(object):
             # Create agent in system with specified inputs for its neighbors,
             # probability of objective function, dual annealing cooling rate,
             # and number of iterations.
-            system.append(ag.Agent(i,nbrs,self.obj_fn,
-                                   self.temperature,self.iterations))
+            system.append(ag.Agent(i,nbrs,self.obj_fn,self.temperature,
+                                   self.iterations,self.mthd,self.p,self.crt))
             
         # Return the generated network of agents
         return system
+
+
+    def generate_history(self):
+        '''Creates a historical profile for all of the agents through Latin
+        Hypercube sampling all of the agents a specified number of times.'''
+        
+        # Generate a latin hypercube sampling for the agents
+        samples = 101  # Set number of samples to take
+        
+        # Create the hypercube sample
+        self.hypercube = doe.lhs(self.n,samples)
+        
+        # Scale the hypercube samples to the agents' bounds
+        for i in range(len(self.system)):
+            
+            # Get bounds from agent
+            min_val = self.system[i].obj_bounds.xmin
+            max_val = self.system[i].obj_bounds.xmax
+            
+            # Scale all of the agents' samples to that range
+            for h in range(samples):
+                self.hypercube[h][i] = min_val + (max_val - min_val)* \
+                                       self.hypercube[h][i]
+        
+        # Cycle through all of the hypercube sample vectors
+        for h in range(samples):
+            
+            # Give the agents initial points to run one optimization on
+            for i in range(len(self.system)):
+                self.vect_new[i] = \
+                    self.system[i].rand_hist_init(self.hypercube[h])
+            
+            # Give agents the optimized vector to evaluate and save
+            for a in self.system:
+                a.save_history(self.vect_new)
     
     
     def design_cycle(self):
@@ -193,7 +251,7 @@ class System(object):
         perf_sys.append(sum(perf_vect))
         
         # Perform design cycles until converged
-        while (cv == 0) and (dc < 100):
+        while (cv == 0) and (dc < self.cyc):
             
             # Increment design cycle counter
             dc = dc + 1
@@ -245,5 +303,5 @@ class Results(object):
         self.design_cycles = des_cyc
         self.perf_system = perf_system
         self.k_mean = k_mean
-        self.perf_agents = perf_agents
+        self.perf_agents = np.array(perf_agents)
         self.k_agents = k_agents

@@ -48,9 +48,20 @@ Parameters:
     itr = [1,2,...,inf)
         The number of iterations that the annealing algorithm will run per
         execution. The default value is 1 to increase the difficulty of
-        converging, but the value may be increased by integer values.
-        
-                               
+        converging, but the value may be increased by integer values.                         
+    mthd = (string)
+        A string input which specifies which method of estimates agents will
+        make if they are specified as returning future estimates. The input
+        must be one of the following terms, specified with quotes:
+            ""       - Agent only utilizes current design values.
+            "future" - Agent utilizes a future estimate with probability prob,
+                       and otherwise uses a current estimate.
+    prob = [0,1]
+        A value on the continuous domain from 0 to 1 which specifies the
+        probability that an agent will generate estimates corresponding to
+        a future design. Therefore, a value of 0 corresponds to 100% current
+        designs and a value of 1 corresponds to 100% future designs.
+
 -------------------------------------------------------------------------------
 Change Log:
 
@@ -76,6 +87,9 @@ Date:       Author:    Description:
                        concept.
 2019-11-04  jmeluso    Differentiated between simulated annealing cooling rate
                        (visit parameter) and initial temperature.
+2020-09-24  jmeluso    Reinstituted multiple estimate types with associated
+                       parameters from original miscommunication model as
+                       method of type "future".
                        
 -------------------------------------------------------------------------------
 """
@@ -90,7 +104,8 @@ class Agent(object):
     '''Defines a class agent which designs an artifact in a system.'''
 
 
-    def __init__(self, loc, nbr, obj="ackley", tmp=10, crt=2.62, itr=1):
+    def __init__(self, loc, nbr, obj="ackley", tmp=10, itr=1, mthd = "",
+                    prob = 0, crt=2.62):
 
         '''Initializes an agent with all of its properties.'''
 
@@ -136,15 +151,75 @@ class Agent(object):
         ##### Estimate Properties #####
         
         self.curr_est = Obj_Eval()  # Initialize the agent's current estimate
+        self.mthd = mthd  # Initialize the type of future estimates being made
+        if self.mthd == "future":
+            self.history = []  # First row x's, second row f(x)'s
+            self.hist_med = Obj_Eval()  # Initialize the agent's historical median
 
+            # Determine the type of estimate being used by the agent. If greater
+            # than estimate probability...
+            if (np.random.random_sample() > prob):
+                self.est_type = "current"  # Set estimate type as current design
+            else:  # Else less than or equal to the estimate probability
+                self.est_type = "future"  # Set estimate type as future projection
+        else:
+            self.est_type = "current"  # Set estimate type as current design        
 
     def __repr__(self):
         '''Returns a representation of the agent'''
         return self.__class__.__name__
         
+    
+    def rand_hist_init(self,lhs_vect):
+        '''Takes in a latin hypercube vector initialization to run a single
+        design cycle. It then feeds this result back to the system without
+        saving. This method is coupled with save history.'''
+        
+        xi = lhs_vect[self.location]
+        
+        # Initialize a vector of neighbors' values from Latin Hypercube Sample
+        # vector (not an object Ojb_Eval)
+        xj = [lhs_vect[j] for j in self.neighbors]
+
+        # Optimize from the given inputs for one iteration
+        result = self.optimize(xi,xj)
+        
+        # Return just the x from the optimized result
+        return result
+    
+    
+    def save_history(self,sys_vect):
+        '''Saves a historical point by receiving corresponding optimized values
+        from the other agents as it optimized its own variable. It then uses
+        the objective function to evaluate the system vector. The x and f(x)
+        of this evaluation are the saved historical point.'''
+        
+        xi = sys_vect[self.location].x
+        
+        # Initialize a vector of neighbors' values from the system vector
+        # (which is an object Ojb_Eval)
+        xj = [sys_vect[j].x for j in self.neighbors]
+        
+        # Evaluate the given inputs
+        result = self.objective(xi, xj)
+        
+        # Save x and f(x) as an objective evaluation to the history list
+        self.history.append(Obj_Eval(xi,result))
+        
         
     def initialize_estimates(self):
         '''Generates a random value for the initial current estimate.'''
+        
+        if self.mthd == "future":
+            # Extract the input and output values from the agent's history.
+            self.hist_in = [h.x for h in self.history]
+            self.hist_out = [h.fx for h in self.history]
+        
+            # Initialize the agent's future estimate by using the historical
+            # median's value.
+            self.median_index = np.argsort(self.hist_out)[len(self.hist_out)//2]
+            self.hist_med.x = self.hist_in[self.median_index]
+            self.hist_med.fx = self.hist_out[self.median_index]
         
         # Initialize the agent's current estimate by randomly generating an
         # a value on the domain of the objective function inputs
@@ -157,6 +232,10 @@ class Agent(object):
         '''Generates an initial estiamte which the agent feeds back to the
         system. Then, the system feeds the system vector back to the agents
         to populate the objective evaluations.'''
+        
+        if self.mthd == "future":
+            # Get the historical median's objective evaluation
+            self.hist_med.fx = self.hist_out[self.median_index]
         
         # Get own value for initial evaluation
         xi = self.curr_est.x
@@ -172,15 +251,26 @@ class Agent(object):
         '''Returns the appropriate estimate according to the type of estimate
         the agent is designated to return.'''
         
-        # Return an estimate ("current") 
-        return self.curr_est  # Return current value to system
+        # Return an estimate ("current" or "future")
+        if self.est_type == "current":
+            return self.curr_est  # Return current value to system
+        else:  # self.est_type == "future"
+            
+            # Only return the future value until the current is better.
+            # Return the lesser of the historical median and current value.
+            if self.curr_est.fx < self.hist_med.fx:
+                # The current estimate is better, so return it
+                return self.curr_est
+            else:
+                # Return historical median to system
+                return self.hist_med
     
     def generate_estimate(self,sys_vect):
         '''Uses a system vector input and the current agent estimate to
         generate one estimate value for the agent. The agent then compiles the
         generated decision variable value and objective evaluation. Finally,
         the agent uses its estimate type to determine which value (the current
-        or future) of the estimate to return.''' ### Should always return current
+        or future) of the estimate to return.'''
         
         xi = self.curr_est.x
         

@@ -41,13 +41,17 @@ if __name__ == '__main__':
     # tri probability of triange, con convergence threshold, tmp for cooling rate,
     # and itr iterations for basin-hopping
     n = 100
-    obj = "langermann"
+    obj = "ackley"
     edg = 2
-    tri = 0.5
+    tri = 0.1
     con = 0.01
+    cyc = 200
     tmp = 0.1
-    crt = 1.1
-    s1 = sy.System(n,obj,edg,tri,con,tmp,crt)
+    itr = 1
+    mthd = "future"
+    p = 0.5
+    crt = 2.62
+    s1 = sy.System(n,obj,edg,tri,con,cyc,tmp,itr,mthd,p,crt)
     
     # Save figures? True or False
     save_figs = False
@@ -87,8 +91,6 @@ if __name__ == '__main__':
         plt.savefig("degree_distribution.tif", format='tif', dpi=250)
         plt.savefig("degree_distribution.eps", format='eps', dpi=250)
     plt.show()
-    
-    # 
     
     # Run the system
     results = s1.run()
