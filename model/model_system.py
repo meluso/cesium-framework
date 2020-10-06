@@ -87,6 +87,7 @@ Date:       Author:    Description:
 2020-09-24  jmeluso    Reinstituted multiple estimate types with associated
                        parameters from original miscommunication model as
 					   method of type "future".
+2020-10-06  jmeluso    Added if statement to run from gutter or by direct call.
 
 -------------------------------------------------------------------------------
 """
@@ -94,8 +95,8 @@ Date:       Author:    Description:
 # Import python packages
 from networkx.generators.random_graphs import powerlaw_cluster_graph as gen
 import numpy as np
-import model_agent as ag
-import doe_lhs as doe
+import model.model_agent as ag
+import tools.doe_lhs as doe
 
 class System(object):
     '''Defines a class system which contains a specified number of agents that
@@ -307,5 +308,38 @@ class Results(object):
         self.k_agents = k_agents
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    '''Runs function if called from the gutter without plotting.'''
+
+    import pickle
+    import datetime as dt
+
+    # Start timer
+    t_start = dt.datetime.now()
+
+    # Generate a system with n nodes, obj objective function, edg random edges,
+    # tri probability of triange, con convergence threshold, tmp for cooling rate,
+    # and itr iterations for basin-hopping
+    n = 100
+    obj = "ackley"
+    edg = 2
+    tri = 0.1
+    con = 0.01
+    cyc = 100
+    tmp = 0.1
+    itr = 1
+    mthd = "future"
+    p = 0.5
+    crt = 2.62
+    s1 = System(n,obj,edg,tri,con,cyc,tmp,itr,mthd,p,crt)
+
+    # Run the system
+    results = s1.run()
+
+    # Stop timer
+    t_stop = dt.datetime.now()
+    print((t_stop - t_start))
+
+    #Save system & results
+    pickle.dump(s1, open("../test/test_system.pickle","wb"))
+    pickle.dump(results, open("../test/test_results.pickle","wb"))
