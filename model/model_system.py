@@ -95,8 +95,8 @@ Date:       Author:    Description:
 # Import python packages
 from networkx.generators.random_graphs import powerlaw_cluster_graph as gen
 import numpy as np
-import model.model_agent as ag
-import tools.doe_lhs as doe
+import model_agent as ag
+import doe_lhs as doe
 
 class System(object):
     '''Defines a class system which contains a specified number of agents that
@@ -341,5 +341,5 @@ if __name__ == '__main__':
     print((t_stop - t_start))
 
     #Save system & results
-    pickle.dump(s1, open("../test/test_system.pickle","wb"))
-    pickle.dump(results, open("../test/test_results.pickle","wb"))
+    pickle.dump(s1, open("test_system.pickle","wb"))
+    pickle.dump(results, open("test_results.pickle","wb"))

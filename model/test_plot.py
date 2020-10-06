@@ -1,57 +1,33 @@
 # -*- coding: utf-8 -*-
 """
 @author: John Meluso
-@date: 2018-10-21
-@name: test_system.py
+@date: 2020-10-06
+@name: plot_test.py
 
 -------------------------------------------------------------------------------
 Description:
 
-This file tests the system class.
-
-The file takes in the amount of nodes that are present in the system and the
-objective function to show how many connections occur between the nodes through
-a network diagram.
-
-The plot that follows shows the amount of nodes that have the same amount of
-connections.
+This file plots results saved by directly running model_system.py.
 
 -------------------------------------------------------------------------------
 Change Log:
 
 Date:       Author:    Description:
-2018-10-10  jmeluso    Initial version.
-2019-07-09  jmeluso    Updated to new inputs System(n,obj,edg,tri,con,div,itr).
-2019-11-04  jmeluso    Updated to new inputs System(n,obj,edg,tri,con,tmp,crt).
+2020-10-06  jmeluso    Initial version.
 
 -------------------------------------------------------------------------------
 """
 
-import model.model_system as sy
+from model_system import Results, System
 import matplotlib.pyplot as plt
 import networkx as nx
-import datetime as dt
+import pickle
 
 if __name__ == '__main__':
 
-    # Start timer
-    t_start = dt.datetime.now()
-
-    # Generate a system with n nodes, obj objective function, edg random edges,
-    # tri probability of triange, con convergence threshold, tmp for cooling rate,
-    # and itr iterations for basin-hopping
-    n = 100
-    obj = "ackley"
-    edg = 2
-    tri = 0.1
-    con = 0.01
-    cyc = 100
-    tmp = 0.1
-    itr = 1
-    mthd = "future"
-    p = 0.5
-    crt = 2.62
-    s1 = sy.System(n,obj,edg,tri,con,cyc,tmp,itr,mthd,p,crt)
+    # Load restults from test
+    s1 = pickle.load(open("test_system.pickle","rb"))
+    results = pickle.load(open("test_results.pickle","rb"))
 
     # Save figures? True or False
     save_figs = False
@@ -74,7 +50,7 @@ if __name__ == '__main__':
     plt.show()
 
     #degree histogram
-    hist = [float(x)/n for x in nx.degree_histogram(s1.graph)]
+    hist = [float(x)/(s1.n) for x in nx.degree_histogram(s1.graph)]
 
     # Create a linear plot of the degree distribution
     #plt.plot(hist, color='b',marker=".",ls="none")
@@ -92,9 +68,6 @@ if __name__ == '__main__':
         plt.savefig("degree_distribution.eps", format='eps', dpi=250)
     plt.show()
 
-    # Run the system
-    results = s1.run()
-
     # Create figure for system performance
     fig_system = plt.figure()
 
@@ -104,7 +77,3 @@ if __name__ == '__main__':
     plt.ylabel("System Performance")
     #plt.semilogy(results.perf_system)
     plt.show()
-
-    # Stop timer
-    t_stop = dt.datetime.now()
-    print((t_stop - t_start))

@@ -24,10 +24,10 @@ Date:       Author:    Description:
 -------------------------------------------------------------------------------
 """
 
-import model.model_agent as ag
+import model_agent as ag
 from numpy.random import random_sample as rand
 import matplotlib.pylab as plt
-import tools.doe_lhs as doe
+import doe_lhs as doe
 
 # Specify test parameters
 obj_fns = ["ackley","griewank","langermann","levy","rosenbrock","schwefel",
