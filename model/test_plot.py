@@ -22,8 +22,13 @@ from model_system import Results, System
 import matplotlib.pyplot as plt
 import networkx as nx
 import pickle
+import datetime as dt
 
 if __name__ == '__main__':
+
+
+    # Start timer
+    t_start = dt.datetime.now()
 
     # Load restults from test
     s1 = pickle.load(open("test_system.pickle","rb"))
@@ -77,3 +82,7 @@ if __name__ == '__main__':
     plt.ylabel("System Performance")
     #plt.semilogy(results.perf_system)
     plt.show()
+
+    # Stop timer
+    t_stop = dt.datetime.now()
+    print((t_stop - t_start))
