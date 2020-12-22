@@ -5,7 +5,7 @@
 #SBATCH --partition=short
 #SBATCH --ntasks=1
 #SBATCH --mem-per-cpu=1000mb
-#SBATCH --time=0-03:00:00
+#SBATCH --time=0-01:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --output=/gpfs1/home/j/m/%u/cesium/logs/%x_%j.log
 #-------------------   End SLURM preamble   -------------------------#
@@ -31,7 +31,7 @@ spack load py-numpy@1.18.4
 spack load py-networkx@2.4
 
 # Run simulation in python for job ii
-python run_sim.py 123456 $JOBDIR
+python run_sim.py 1058750 $JOBDIR
 
 
 # to submit 100 jobs, call the file submit_loop.sh
