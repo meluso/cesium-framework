@@ -88,7 +88,7 @@ def plot_data(filename):
 
     # Stop timer
     t_stop = dt.datetime.now()
-    print((t_stop - t_start))
+    print('Test Plot Time Elapsed: ' + str(t_stop - t_start) + '\n')
 
 
 if __name__ == '__main__':

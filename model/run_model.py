@@ -9,7 +9,7 @@ import sys
 import datetime as dt
 import data_manager as dm
 import model_system as sy
-import run_params as rp
+import get_params as gp
 import test_plot as tp
 from numpy.random import default_rng
 
@@ -17,12 +17,12 @@ from numpy.random import default_rng
 rng = default_rng()
 
 
-def run_system(params):
+def run_model(params):
     """Function which runs one instance of the system model for a given set of
     input parameters and saves the resulting data."""
 
     # Print input parameters
-    print(params)
+    print('Run parameters: ' + str(params) + '\n')
 
     # Start timer
     t_start = dt.datetime.now()
@@ -43,14 +43,15 @@ def run_system(params):
 
     # Stop timer
     t_stop = dt.datetime.now()
-    print((t_stop - t_start))
+    print('Run Time Elapsed: ' + str(t_stop - t_start) + '\n')
 
     # Build data to return
-    summary = [params['ind'], params['nod'], params['obj'],
-               params['edg'], params['tri'], params['con'],
-               params['cyc'], params['tmp'], params['itr'],
-               params['mth'], params['prb'], params['crt'],
-               results.design_cycles,results.perf_system[-1]]
+    summary = [params['ind'], params['run'],
+               params['nod'], params['obj'], params['edg'],
+               params['tri'], params['con'], params['cyc'],
+               params['tmp'], params['itr'], params['mth'],
+               params['prb'], params['crt'],
+               results.design_cycles, results.perf_system[-1]]
 
     history = results.perf_system
 
@@ -59,10 +60,9 @@ def run_system(params):
 
 
 if __name__ == '__main__':
-    params = rp.run_params()
+    params = gp.get_params()
     case = rng.integers(len(params))
-    print(params[case])
-    summary, history, system = run_system(params[case])
+    summary, history, system = run_model(params[case])
     dm.save_test(summary, history, system)
     if not(sys.platform.startswith('linux')):
         tp.plot_test()

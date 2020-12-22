@@ -29,7 +29,7 @@ Date:       Author:    Description:
 
 import sys
 import data_manager as dm
-import run_params as rp
+import get_params as gp
 import run_model as rm
 import test_plot as tp
 from numpy.random import default_rng
@@ -45,28 +45,28 @@ if __name__ == '__main__':
 
     if run_mode == "random":
 
-        params_all = rp.run_params()
+        params_all = gp.get_params()
         case = rng.integers(len(params_all))
         params_run = params_all[case]
 
     else:
 
         params_run = {'ind': 999999,
+                      'run': 999999,
                       'nod': 100,
                       'obj': "griewank",
                       'edg': 2,
                       'tri': 0.4,
                       'con': 0.1,
                       'cyc': 100,
-                      'tmp': 0.1,
+                      'tmp': 10,
                       'itr': 1,
                       'mth': "future",
                       'prb': 0.5,
                       'crt': 2.62
                       }
 
-    print(params_run)
-    summary, history, system = rm.run_system(params_run)
+    summary, history, system = rm.run_model(params_run)
     dm.save_test(summary, history, system)
     if not(sys.platform.startswith('linux')):
         tp.test_plot()
