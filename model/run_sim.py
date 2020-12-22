@@ -20,54 +20,89 @@ Date:       Author:    Description:
 -------------------------------------------------------------------------------
 """
 
-import sys, os
+import sys
 import numpy as np
-import cPickle as pickle
+import datetime as dt
+import data_manager as dm
+import run_model as rm
+import run_params as rp
+from numpy.random import default_rng
+
+# Create the random number generator
+rng = default_rng()
+
+
+def run_simulation(test_mode=False):
+
+    # Get start time
+    t_start = dt.datetime.now()
+
+    '''Set running conditions based on platform.'''
+    if sys.platform.startswith('linux'):
+
+        # get the number of this job and the total number of jobs from the
+        # queue system. These arguments are given by the VACC to this script
+        # via submit_job.sh. If there are n jobs to be run total (numruns = n),
+        # then runnum should run from 0 to n-1. In notation: [0,n) or [0,n-1].
+        try:
+            runnum = int(sys.argv[1])
+            output_dir = str(sys.argv[2])
+        except IndexError:
+            sys.exit("Usage: %s runnum numruns" % sys.argv[0] )
+
+    else:
+
+        runnum = 999999
+        output_dir = '../data/test'
+
+    '''Main body of simulation.'''
+
+    # Get parameter values
+    params = rp.run_params()
+
+    if test_mode == True:
+
+        # Select random case for testing
+        case = rng.integers(len(params))
+
+        # Run simulation for specified set of parameters
+        summary, history, system = rm.run_system(params[case])
+
+        # Build name for specific test
+        case_str = f'case{case:06}'
+        job_str = f'run{runnum:06}'
+        filename = output_dir + '/' + case_str + '_' + job_str
+
+        # Save results to location specified by platform
+        dm.save_data(filename,summary,history,system)
+
+        # Print end time
+        t_stop = dt.datetime.now()
+        print(t_stop - t_start)
+        print(filename)
+
+        return filename
+
+    else:
+
+        # Loop through all cases
+        for case in np.arange(len(params)):
+
+            # Run simulation for specified set of parameters
+            summary, history, system = rm.run_system(params[case])
+
+            # Build name for specific test
+            case_str = f'case{case:06}'
+            job_str = f'run{runnum:06}'
+            filename = output_dir + '/' + case_str + '_' + job_str
+
+            # Save results to location specified by platform
+            dm.save_data(filename,summary,history)
+
+        # Print end time
+        t_stop = dt.datetime.now()
+        print(t_stop - t_start)
+
 
 if __name__ == '__main__':
-
-    # get the number of this job and the total number of jobs from the PBS
-    # queue system. These arguments are given by the VACC to this script via
-    # submit_job.sh. If there are n jobs to be run total (NUMJOBS = n), then
-    # JOBNUM should run from 0 to n-1. In notation: [0,n) or [0,n-1].
-    try:
-        JOBNUM, NUMJOBS = map(int, sys.argv[1:])
-    except IndexError:
-        sys.exit("Usage: %s JOBNUM NUMJOBS" % sys.argv[0] )
-
-    # build a big list of all combinations of parameters and runs, for the
-    # simulations for ALL jobs:
-    list_parameter1 = np.arange(0,1.0,10)
-    list_parameter2 = np.arange(-1,1,100)
-    num_runs = 100 # perform, in this case, 100 identical runs for each pair of parameters (to average over)
-    params = []
-    for p in list_parameter1:
-        for q in list_parameter2:
-            for r in range(num_runs):
-                params.append((p,q,r))
-
-    # now keep only the parameters for THIS job:
-    params = [p for i,p in enumerate(params) if i % NUMJOBS == JOBNUM]
-    # (this will spread the parameters evenly over the parallel jobs)
-
-
-    # prep output directory
-    output_dir = "data"
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    # run the simulations for THIS job:
-    for p,q,r in params:
-
-        var1,var2 = SIMULATION(p1,p2) # replace with actual simulation code
-        # (This example assumes each sim creates two output variables. this
-        # depends on what you are specifically doing.)
-
-        # save any files for this simulation:
-        parameter_slug = "p%0.2f_q%0.2f_run%04d" % (p1,p2,r)
-        pickle.dump(simulation_var1, open('%s/simVar1__%s.pkl' % (output_dir,parameter_slug), 'wb'), protocol=-1)
-        pickle.dump(simulation_var2, open('%s/simVar2__%s.pkl' % (output_dir,parameter_slug), 'wb'), protocol=-1)
-        # (This is saving the variables as python pickles, but it may be better
-        # for your actual simulation to save csv files or some other format.)
-
-
+    run_simulation()

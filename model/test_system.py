@@ -27,84 +27,46 @@ Date:       Author:    Description:
 -------------------------------------------------------------------------------
 """
 
-import model_system as sy
-import matplotlib.pyplot as plt
-import networkx as nx
-import datetime as dt
+import sys
+import data_manager as dm
+import run_params as rp
+import run_model as rm
+import test_plot as tp
+from numpy.random import default_rng
+
+# Create the random number generator
+rng = default_rng()
 
 if __name__ == '__main__':
 
-    # Start timer
-    t_start = dt.datetime.now()
+    # Specify run mode
+    #run_mode = "random"
+    run_mode = ""
 
-    # Generate a system with n nodes, obj objective function, edg random edges,
-    # tri probability of triange, con convergence threshold, tmp for cooling rate,
-    # and itr iterations for basin-hopping
-    n = 100
-    obj = "ackley"
-    edg = 2
-    tri = 0.1
-    con = 0.01
-    cyc = 100
-    tmp = 0.1
-    itr = 1
-    mthd = "future"
-    p = 0.5
-    crt = 2.62
-    s1 = sy.System(n,obj,edg,tri,con,cyc,tmp,itr,mthd,p,crt)
+    if run_mode == "random":
 
-    # Save figures? True or False
-    save_figs = False
+        params_all = rp.run_params()
+        case = rng.integers(len(params_all))
+        params_run = params_all[case]
 
-    # Plot the system
-    options = {
-            'node_color': 'red',
-            'node_size': 15,
-            'width': 1
-            }
+    else:
 
-    # Create new figure for network graph
-    fig_network = plt.figure()
+        params_run = {'ind': 999999,
+                      'nod': 100,
+                      'obj': "griewank",
+                      'edg': 2,
+                      'tri': 0.4,
+                      'con': 0.1,
+                      'cyc': 100,
+                      'tmp': 0.1,
+                      'itr': 1,
+                      'mth': "future",
+                      'prb': 0.5,
+                      'crt': 2.62
+                      }
 
-    # Build network graph in figure
-    nx.draw_kamada_kawai(s1.graph, **options)
-    if save_figs:
-        plt.savefig("network_graph.tif", format='tif', dpi=250)
-        plt.savefig("network_graph.eps", format='eps', dpi=250)
-    plt.show()
-
-    #degree histogram
-    hist = [float(x)/n for x in nx.degree_histogram(s1.graph)]
-
-    # Create a linear plot of the degree distribution
-    #plt.plot(hist, color='b',marker=".",ls="none")
-    #plt.show()
-
-    # Create a logarithmic plot of the degree distribution
-    fig_log = plt.figure()
-
-    # Build logarithmic plot of the degree distribution
-    plt.loglog(hist, color='b',marker=".",ls="none")
-    plt.ylabel("Fraction of Nodes")
-    plt.xlabel("Artifact Degree")
-    if save_figs:
-        plt.savefig("degree_distribution.tif", format='tif', dpi=250)
-        plt.savefig("degree_distribution.eps", format='eps', dpi=250)
-    plt.show()
-
-    # Run the system
-    results = s1.run()
-
-    # Create figure for system performance
-    fig_system = plt.figure()
-
-    # Plot the system performance
-    plt.plot(results.perf_system)
-    plt.xlabel("Design Cycle")
-    plt.ylabel("System Performance")
-    #plt.semilogy(results.perf_system)
-    plt.show()
-
-    # Stop timer
-    t_stop = dt.datetime.now()
-    print((t_stop - t_start))
+    print(params_run)
+    summary, history, system = rm.run_system(params_run)
+    dm.save_test(summary, history, system)
+    if not(sys.platform.startswith('linux')):
+        tp.test_plot()
