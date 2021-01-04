@@ -40,8 +40,8 @@ rng = default_rng()
 if __name__ == '__main__':
 
     # Specify run mode
-    #run_mode = "random"
-    run_mode = ""
+    run_mode = "random"
+    #run_mode = ""
 
     if run_mode == "random":
 
@@ -53,8 +53,8 @@ if __name__ == '__main__':
 
         params_run = {'ind': 999999,
                       'run': 999999,
-                      'nod': 100,
-                      'obj': "griewank",
+                      'nod': 500,
+                      'obj': "styblinski-tang",
                       'edg': 2,
                       'tri': 0.4,
                       'con': 0.1,
@@ -69,4 +69,4 @@ if __name__ == '__main__':
     summary, history, system = rm.run_model(params_run)
     dm.save_test(summary, history, system)
     if not(sys.platform.startswith('linux')):
-        tp.test_plot()
+        tp.plot_test()

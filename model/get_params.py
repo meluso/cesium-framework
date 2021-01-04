@@ -7,22 +7,23 @@ Created on Thu Oct  8 10:27:28 2020
 
 import numpy as np
 
-def get_params(exec_num=1):
+def get_params(exec_num=2):
     """Creates parameters for a simulation."""
 
-    index = -1  # Index counter for simulation runs
-    params = []  # Empty parameter array for simulation
+    # Count of cases for each execution for unique indexing
+    case_count = [3388,3388,3388,3388]
+
+    # Index counter initialization for simulation runs
+    index = sum(case_count[0:exec_num-1])-1
+
+    # Empty parameter array for simulation
+    params = []
 
     if exec_num == 2:
 
-        # Future executions
-        print('No Execution 2')
-
-    else:
-
-        '''Create array for each input parameter.'''
-        nod = np.array([50,100,500,1000])
-        obj = ["ackley","langermann","levy","sphere"]
+        # Create array for each input parameter.
+        nod = [100]
+        obj = ["absolute-sum","sphere","levy","ackley"]
         edg = [2]
         tri = np.round(np.arange(0,1.1,0.1),decimals=1)
         con = np.array([0.01,0.05,0.1,0.5,1,5,10])
@@ -32,9 +33,53 @@ def get_params(exec_num=1):
         mth = ["future"]
         prb = np.round(np.arange(0,1.1,0.1),decimals=1)
         crt = [2.62]
-        run = np.arange(0,100)
 
-    '''Iteratively construct dictionaries and populate the parameter list.'''
+    elif exec_num == 3:
+
+        # Create array for each input parameter.
+        nod = [500]
+        obj = ["absolute-sum","sphere","levy","ackley"]
+        edg = [2]
+        tri = np.round(np.arange(0,1.1,0.1),decimals=1)
+        con = np.array([0.01,0.05,0.1,0.5,1,5,10])
+        cyc = [100]
+        tmp = [0.1]
+        itr = [1]
+        mth = ["future"]
+        prb = np.round(np.arange(0,1.1,0.1),decimals=1)
+        crt = [2.62]
+
+    elif exec_num == 4:
+
+        # Create array for each input parameter.
+        nod = [1000]
+        obj = ["absolute-sum","sphere","levy","ackley"]
+        edg = [2]
+        tri = np.round(np.arange(0,1.1,0.1),decimals=1)
+        con = np.array([0.01,0.05,0.1,0.5,1,5,10])
+        cyc = [100]
+        tmp = [0.1]
+        itr = [1]
+        mth = ["future"]
+        prb = np.round(np.arange(0,1.1,0.1),decimals=1)
+        crt = [2.62]
+
+    else: # execu_num == 1:
+
+        # Create array for each input parameter.
+        nod = [50]
+        obj = ["absolute-sum","sphere","levy","ackley"]
+        edg = [2]
+        tri = np.round(np.arange(0,1.1,0.1),decimals=1)
+        con = np.array([0.01,0.05,0.1,0.5,1,5,10])
+        cyc = [100]
+        tmp = [0.1]
+        itr = [1]
+        mth = ["future"]
+        prb = np.round(np.arange(0,1.1,0.1),decimals=1)
+        crt = [2.62]
+
+    # Iteratively construct dictionaries and populate the parameter list.
     for nn in np.arange(len(nod)):
         for oo in np.arange(len(obj)):
             for ee in np.arange(len(edg)):
@@ -47,25 +92,24 @@ def get_params(exec_num=1):
                                         for pp in np.arange(len(prb)):
                                             for cr in np.arange(len(crt)):
                                                 index += 1
-                                                for rr in np.arange(len(run)):
-                                                    new_params \
-                                                        = {'ind': index,
-                                                           'run': run[rr],
-                                                           'nod': nod[nn,],
-                                                           'obj': obj[oo],
-                                                           'edg': edg[ee],
-                                                           'tri': tri[tr,],
-                                                           'con': con[co,],
-                                                           'cyc': cyc[cy],
-                                                           'tmp': tmp[tm],
-                                                           'itr': itr[ii],
-                                                           'mth': mth[mm],
-                                                           'prb': prb[pp],
-                                                           'crt': crt[cr]
-                                                           }
-                                                    params.append(new_params)
+                                                new_params \
+                                                    = {'ind': index,
+                                                       'run': -1,
+                                                       'nod': nod[nn],
+                                                       'obj': obj[oo],
+                                                       'edg': edg[ee],
+                                                       'tri': tri[tr,],
+                                                       'con': con[co,],
+                                                       'cyc': cyc[cy],
+                                                       'tmp': tmp[tm],
+                                                       'itr': itr[ii],
+                                                       'mth': mth[mm],
+                                                       'prb': prb[pp],
+                                                       'crt': crt[cr]
+                                                       }
+                                                params.append(new_params)
 
-    '''Return parameters'''
+    # Return parameters
     return params
 
 

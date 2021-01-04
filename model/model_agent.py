@@ -26,6 +26,7 @@ Parameters:
         A string input which specifies the objective function the agent uses
         to evaluate the quality of a design. The input must be one of the
         following terms, specified with quotes:
+            "absolute-sum"    - uses the sum of the absolute value of elements
             "ackley"          - uses the Ackley function as the objective,
                                 which is also the default setting
             "griewank"        - uses the Griewank function as objective
@@ -91,6 +92,7 @@ Date:       Author:    Description:
                        parameters from original miscommunication model as
                        method of type "future".
 2020-10-08  jmeluso    Updated the offset value in the Stylinski-Tang function.
+2020-12-23  jmeluso    Added the absolute-sum function.
 
 -------------------------------------------------------------------------------
 """
@@ -124,7 +126,9 @@ class Agent(object):
         self.objective = Objective(self.fn,self.neighbors)
 
         # Set decision variable boundaries
-        if self.fn == "ackley":
+        if self.fn == "absolute-sum":
+            self.obj_bounds = Bounds(-10.00,10.00)
+        elif self.fn == "ackley":
             self.obj_bounds = Bounds(-32.768,32.768)
         elif self.fn == "griewank":
             self.obj_bounds = Bounds(-600.00,600.00)
@@ -348,7 +352,16 @@ class Objective:
         the current agent and (xj) for the adjacent agents.'''
 
         # Select the correct function to evaluate
-        if self.fn == "ackley":
+        if self.fn == "absolute-sum":
+
+            # Get the absolute value of xi
+            result = abs(xi)
+
+            # Add the absolute value of each xj term
+            for j in xj:
+                result += abs(j)
+
+        elif self.fn == "ackley":
 
             # Set values of constants for ackley function
             a = 20

@@ -9,7 +9,6 @@ import sys
 import datetime as dt
 import data_manager as dm
 import model_system as sy
-import get_params as gp
 import test_plot as tp
 from numpy.random import default_rng
 
@@ -22,7 +21,7 @@ def run_model(params):
     input parameters and saves the resulting data."""
 
     # Print input parameters
-    print('Run parameters: ' + str(params) + '\n')
+    print('Run parameters: ' + str(params))
 
     # Start timer
     t_start = dt.datetime.now()
@@ -43,7 +42,7 @@ def run_model(params):
 
     # Stop timer
     t_stop = dt.datetime.now()
-    print('Run Time Elapsed: ' + str(t_stop - t_start) + '\n')
+    print('Run Time Elapsed: ' + str(t_stop - t_start))
 
     # Build data to return
     summary = [params['ind'], params['run'],
@@ -58,11 +57,3 @@ def run_model(params):
     # Return results
     return summary, history, system
 
-
-if __name__ == '__main__':
-    params = gp.get_params()
-    case = rng.integers(len(params))
-    summary, history, system = run_model(params[case])
-    dm.save_test(summary, history, system)
-    if not(sys.platform.startswith('linux')):
-        tp.plot_test()
