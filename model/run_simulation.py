@@ -109,8 +109,7 @@ def run_simulation(test_mode=True):
             # Build name for specific test
             case_str = f'case{casenum:06}'
             run_str = f'run{runnum:06}'
-            filename = outputdir + '/' + case_str + '_' + run_str \
-                + '_summary.csv'
+            filename = outputdir + '/' + case_str + '_' + run_str
 
             # Save results to location specified by platform
             dm.save_data(filename,summary,history)
