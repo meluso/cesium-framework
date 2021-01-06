@@ -32,7 +32,7 @@ from numpy.random import default_rng
 rng = default_rng()
 
 
-def run_simulation(test_mode=True):
+def run_simulation(mode="test"):
 
     # Get start time
     t_start = dt.datetime.now()
@@ -46,24 +46,41 @@ def run_simulation(test_mode=True):
         # via submit_job.sh. If there are n jobs to be run total (numruns = n),
         # then casenum should run from 0 to n-1. In notation: [0,n) or [0,n-1].
         try:
+
+            # Get directory and execution number
             outputdir = str(sys.argv[1])
             execnum = int(sys.argv[2])
-            runnum = int(sys.argv[3])
+
+            # Get parameters for execution number
+            params = gp.get_params(execnum)
+
+            # Get specific case-run combo if mode is single, else get run input
+            if mode == "single":
+                caseruncombo = int(sys.argv[3])
+            else:
+                runnum = int(sys.argv[3])
+
         except IndexError:
             sys.exit("Usage: %s outputdir execnum runnum" % sys.argv[0] )
 
     else:
 
+        # Get directory and execution number
         outputdir = '../data/test'
-        execnum = 2
-        runnum = 999999
+        execnum = 5
+
+        # Get parameters for execution number
+        params = gp.get_params(execnum)
+
+        # Get specific case-run combo if mode is single, else set top runnum
+        if mode == "single":
+            caseruncombo = rng.integers(len(params))
+        else:
+            runnum = 999999
 
     '''Run simulation.'''
 
-    # Get parameter values
-    params = gp.get_params(execnum)
-
-    if test_mode:
+    if mode == "test":
 
         # Select random case for testing
         casenum = rng.integers(len(params))
@@ -92,7 +109,36 @@ def run_simulation(test_mode=True):
 
         return filename
 
-    else:
+    elif mode == "single":
+
+        # Run a single case with a specified run number
+        case = params[caseruncombo]
+
+        # Get case and run for testing
+        casenum = case['ind']
+        runnum = case['run']
+
+        # Run simulation for specified set of parameters
+        summary, history, system = rm.run_model(case)
+
+        # Build name for specific test
+        case_str = f'case{casenum:06}'
+        run_str = f'run{runnum:06}'
+        filename = outputdir + '/' + case_str + '_' + run_str
+
+        # Save results to location specified by platform
+        dm.save_data(filename,summary,history)
+
+        # Print filename
+        print('Output Filename Base: ' + filename + '\n')
+
+        # Print end time
+        t_stop = dt.datetime.now()
+
+        print('Case Time Elapsed: ' + str(t_stop - t_start))
+
+
+    elif mode == "multi":
 
         # Loop through all cases
         for case in params:
@@ -122,6 +168,10 @@ def run_simulation(test_mode=True):
 
         print('Case Time Elapsed: ' + str(t_stop - t_start))
 
+    else:
+
+        print("Not a valid input. No simulation run.")
+
 
 if __name__ == '__main__':
-    run_simulation(False)
+    run_simulation("single")

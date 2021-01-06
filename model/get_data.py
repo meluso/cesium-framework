@@ -138,8 +138,24 @@ def load_incompletes(execnum):
                             "rb"))
 
 
+def run_load_incompletes():
+    """Loads incomplete runs for the first four executions and saves them in a
+    single structure for use with get_params."""
+
+    exec_list = [1,2,3,4]
+    leftovers_all = []
+
+    for execnum in exec_list:
+        leftovers = load_incompletes(execnum)
+
+        for ll in leftovers:
+            leftovers_all.append(ll.copy())
+
+    pickle.dump(leftovers_all, open("leftovers.pickle","wb"))
+    return leftovers_all
+
 if __name__ == '__main__':
-    run_get_incompletes()
+    leftovers = run_load_incompletes()
 
 
 

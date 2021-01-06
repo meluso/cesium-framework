@@ -6,18 +6,10 @@ Created on Thu Oct  8 10:27:28 2020
 """
 
 import numpy as np
+import pickle
 
 def get_params(exec_num=2):
     """Creates parameters for a simulation."""
-
-    # Count of cases for each execution for unique indexing
-    case_count = [3388,3388,3388,3388]
-
-    # Index counter initialization for simulation runs
-    index = sum(case_count[0:exec_num-1])-1
-
-    # Empty parameter array for simulation
-    params = []
 
     if exec_num == 2:
 
@@ -34,6 +26,10 @@ def get_params(exec_num=2):
         prb = np.round(np.arange(0,1.1,0.1),decimals=1)
         crt = [2.62]
 
+        # Iterate through parameters
+        params = iterate_pararms(exec_num,nod,obj,edg,tri,con,
+                                 cyc,tmp,itr,mth,prb,crt)
+
     elif exec_num == 3:
 
         # Create array for each input parameter.
@@ -48,6 +44,10 @@ def get_params(exec_num=2):
         mth = ["future"]
         prb = np.round(np.arange(0,1.1,0.1),decimals=1)
         crt = [2.62]
+
+        # Iterate through parameters
+        params = iterate_pararms(exec_num,nod,obj,edg,tri,con,
+                                 cyc,tmp,itr,mth,prb,crt)
 
     elif exec_num == 4:
 
@@ -64,7 +64,16 @@ def get_params(exec_num=2):
         prb = np.round(np.arange(0,1.1,0.1),decimals=1)
         crt = [2.62]
 
-    else: # execu_num == 1:
+        # Iterate through parameters
+        params = iterate_pararms(exec_num,nod,obj,edg,tri,con,
+                                 cyc,tmp,itr,mth,prb,crt)
+
+    elif exec_num == 5:
+
+        # Load parameter list from pickle
+        params = pickle.load(open("leftovers.pickle","rb"))
+
+    else: # exec_num == 1:
 
         # Create array for each input parameter.
         nod = [50]
@@ -78,6 +87,27 @@ def get_params(exec_num=2):
         mth = ["future"]
         prb = np.round(np.arange(0,1.1,0.1),decimals=1)
         crt = [2.62]
+
+        # Iterate through parameters
+        params = iterate_pararms(exec_num,nod,obj,edg,tri,con,
+                                 cyc,tmp,itr,mth,prb,crt)
+
+    # Return parameters
+    return params
+
+
+def iterate_pararms(exec_num,nod,obj,edg,tri,con,cyc,tmp,itr,mth,prb,crt):
+    """Iterates through a set of parameter ranges to construct a full list of
+    cases to run."""
+
+    # Count of new, unique cases created for each execution for unique indexing
+    case_count = [3388,3388,3388,3388,0]
+
+    # Index counter initialization for simulation runs
+    index = sum(case_count[0:exec_num-1])-1
+
+    # Empty parameter array for simulation
+    params = []
 
     # Iteratively construct dictionaries and populate the parameter list.
     for nn in np.arange(len(nod)):
@@ -114,4 +144,4 @@ def get_params(exec_num=2):
 
 
 if __name__ == '__main__':
-    params = get_params()
+    params = get_params(5)
