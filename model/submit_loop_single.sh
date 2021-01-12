@@ -1,5 +1,5 @@
-for i in $(seq 0 20275)
+for i in $(seq 0 273)
 do
-	sbatch --export=ii=${i} submit_exec005.sbat
+	sbatch --export=ii=${i} submit_exec009.sbat
 	sleep 0.1
 done
