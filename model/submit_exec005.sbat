@@ -13,6 +13,7 @@
 # Specify data directory
 JOBDIR=/gpfs2/scratch/jmeluso/cesium/data/exec005
 EXECNUM=5
+NUMSUBSETS=100
 
 # Make job directory
 if [ ! -d $JOBDIR ] ; then
@@ -32,7 +33,7 @@ spack load py-numpy@1.18.4
 spack load py-networkx@2.4
 
 # Run simulation in python for job ii
-python run_simulation.py $JOBDIR $EXECNUM "${ii}"
+python run_simulation.py $JOBDIR $EXECNUM "${ii}" $NUMSUBSETS
 
 
 # to submit 100 jobs, call the file submit_loop.sh

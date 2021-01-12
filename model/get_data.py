@@ -16,26 +16,38 @@ import sys
 def os_setup():
     """Configures the function for the current operating system."""
 
+    # Get variables from platform
     if sys.platform.startswith('linux'):
 
         try:
             outputdir = str(sys.argv[1])
             execnum = int(sys.argv[2])
-            run_list = np.arange(100)
+
         except IndexError:
             sys.exit("Usage: %s outputdir" % sys.argv[0] )
 
     else:
 
         outputdir = '../data/test'
-        execnum = 2
-        run_list = [999999]
+        execnum = 8
 
-    return outputdir, execnum, run_list
+    # Specify outputs based on execution number
+    if execnum <= 4:
+
+        # Executions 1-4
+        if sys.platform.startswith('linux'):
+            run_list = np.arange(100)
+        else:
+            run_list = [999999]
+        return outputdir, execnum, run_list
+
+    else:
+
+        # Executions >= 5
+        return outputdir, execnum
 
 
-
-def change_filenames(outputdir, execnum, run_list):
+def change_filenames_exec001_004(outputdir, execnum, run_list):
     """Renames file case numbers to match their respective indeces."""
 
     # Get parameters for specified execution
@@ -71,12 +83,12 @@ def change_filenames(outputdir, execnum, run_list):
                 print('No ' + file_prefix)
 
 
-def run_change_filenames():
+def run_change_filenames_exec001_004():
     outputdir, execnum, run_list = os_setup()
-    change_filenames(outputdir, execnum, run_list)
+    change_filenames_exec001_004(outputdir, execnum, run_list)
 
 
-def get_incompletes(outputdir, execnum, run_list):
+def get_incompletes(outputdir, execnum, run_list=[]):
     """Identifies runs that didn't save data for the specified execution,
     directory, and list of runs."""
 
@@ -99,10 +111,29 @@ def get_incompletes(outputdir, execnum, run_list):
         casenum = case['ind']
         counts[case_num,index_case] = casenum
 
-        for runnum in run_list:
+        if execnum <= 4:
 
-            # Add run number to case info
-            case['run'] = runnum
+            for runnum in run_list:
+
+                # Add run number to case info
+                case['run'] = runnum
+
+                # Build name for specific test
+                case_str = f'case{casenum:06}'
+                run_str = f'run{runnum:06}'
+                file_prefix = outputdir + '/' + case_str + '_' + run_str
+
+                # Check if the file exists
+                try:
+                    summary, history = dm.load_data(file_prefix)
+                    counts[case_num,index_count] += 1
+                except IOError:
+                    leftovers.append(case.copy())
+
+        else:
+
+            # Get run number from case info
+            runnum = case['run']
 
             # Build name for specific test
             case_str = f'case{casenum:06}'
@@ -112,16 +143,23 @@ def get_incompletes(outputdir, execnum, run_list):
             # Check if the file exists
             try:
                 summary, history = dm.load_data(file_prefix)
-                counts[case_num,index_count] += 1
             except IOError:
                 leftovers.append(case.copy())
 
     return leftovers, counts
 
 
-def run_get_incompletes():
+def run_get_incompletes_exec001_004():
     outputdir, execnum, run_list = os_setup()
-    leftovers, counts = get_incompletes(outputdir, execnum, run_list)
+    leftovers, counts \
+        = get_incompletes(outputdir, execnum, run_list)
+    pickle.dump(leftovers, open(f'leftovers_exec{execnum:03}.pickle',"wb"))
+    np.save(f'counts_exec{execnum:03}.npy',counts)
+
+
+def run_get_incompletes_exec005_008():
+    outputdir, execnum = os_setup()
+    leftovers, counts = get_incompletes(outputdir, execnum)
     pickle.dump(leftovers, open(f'leftovers_exec{execnum:03}.pickle',"wb"))
     np.save(f'counts_exec{execnum:03}.npy',counts)
 
@@ -155,7 +193,7 @@ def run_load_incompletes():
     return leftovers_all
 
 if __name__ == '__main__':
-    leftovers = run_load_incompletes()
+    leftovers = load_incompletes(8)
 
 
 

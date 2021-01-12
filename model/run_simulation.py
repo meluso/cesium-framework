@@ -57,6 +57,9 @@ def run_simulation(mode="test"):
             # Get specific case-run combo if mode is single, else get run input
             if mode == "single":
                 caseruncombo = int(sys.argv[3])
+            elif mode == "subset":
+                subset = int(sys.argv[3])
+                numsets = int(sys.argv[4])
             else:
                 runnum = int(sys.argv[3])
 
@@ -67,7 +70,7 @@ def run_simulation(mode="test"):
 
         # Get directory and execution number
         outputdir = '../data/test'
-        execnum = 5
+        execnum = 9
 
         # Get parameters for execution number
         params = gp.get_params(execnum)
@@ -75,6 +78,9 @@ def run_simulation(mode="test"):
         # Get specific case-run combo if mode is single, else set top runnum
         if mode == "single":
             caseruncombo = rng.integers(len(params))
+        elif mode == "subset":
+            numsets = 1000
+            subset = rng.integers(numsets)
         else:
             runnum = 999999
 
@@ -105,7 +111,7 @@ def run_simulation(mode="test"):
 
         # Print end time
         t_stop = dt.datetime.now()
-        print('Case Time Elapsed: ' + str(t_stop - t_start))
+        print('Simulation Time Elapsed: ' + str(t_stop - t_start))
 
         return filename
 
@@ -135,10 +141,43 @@ def run_simulation(mode="test"):
         # Print end time
         t_stop = dt.datetime.now()
 
-        print('Case Time Elapsed: ' + str(t_stop - t_start))
+        print('Simulation Time Elapsed: ' + str(t_stop - t_start))
 
+    elif mode == "subset":
 
-    elif mode == "multi":
+        # Get number of parameter combinations in subset
+        par_per_sub = int(np.ceil(len(params)/numsets))
+
+        # Get subset of parameters
+        sub_params = params[par_per_sub*(subset-1):par_per_sub*subset]
+
+        # Loop through all cases
+        for case in sub_params:
+
+            # Get case and run for testing
+            casenum = case['ind']
+            runnum = case['run']
+
+            # Run simulation for specified set of parameters
+            summary, history, system = rm.run_model(case)
+
+            # Build name for specific test
+            case_str = f'case{casenum:06}'
+            run_str = f'run{runnum:06}'
+            filename = outputdir + '/' + case_str + '_' + run_str
+
+            # Save results to location specified by platform
+            dm.save_data(filename,summary,history)
+
+            # Print filename
+            print('Output Filename Base: ' + filename + '\n')
+
+        # Print end time
+        t_stop = dt.datetime.now()
+
+        print('Simulation Time Elapsed: ' + str(t_stop - t_start))
+
+    elif mode == "all":
 
         # Loop through all cases
         for case in params:
@@ -166,7 +205,7 @@ def run_simulation(mode="test"):
         # Print end time
         t_stop = dt.datetime.now()
 
-        print('Case Time Elapsed: ' + str(t_stop - t_start))
+        print('Simulation Time Elapsed: ' + str(t_stop - t_start))
 
     else:
 

@@ -71,7 +71,32 @@ def get_params(exec_num=2):
     elif exec_num == 5:
 
         # Load parameter list from pickle
-        params = pickle.load(open("leftovers.pickle","rb"))
+        # 0 Leftover from initial run
+        params = pickle.load(open("leftovers_exec001.pickle","rb"))
+
+    elif exec_num == 6:
+
+        # Load parameter list from pickle
+        # 3407 leftover from initial run
+        params = pickle.load(open("leftovers_exec002.pickle","rb"))
+
+    elif exec_num == 7:
+
+        # Load parameter list from pickle
+        # 6679 leftover from initial run
+        params = pickle.load(open("leftovers_exec003.pickle","rb"))
+
+    elif exec_num == 8:
+
+        # Load parameter list from pickle
+        # 10190 leftover from initial run
+        params = pickle.load(open("leftovers_exec004.pickle","rb"))
+
+    elif exec_num == 9:
+
+        # Load parameter list from pickle
+        # 274 leftover from execution 274
+        params = pickle.load(open("leftovers_exec008.pickle","rb"))
 
     else: # exec_num == 1:
 
@@ -101,7 +126,7 @@ def iterate_pararms(exec_num,nod,obj,edg,tri,con,cyc,tmp,itr,mth,prb,crt):
     cases to run."""
 
     # Count of new, unique cases created for each execution for unique indexing
-    case_count = [3388,3388,3388,3388,0]
+    case_count = [3388,3388,3388,3388,0,0,0,0,0]
 
     # Index counter initialization for simulation runs
     index = sum(case_count[0:exec_num-1])-1
@@ -144,4 +169,4 @@ def iterate_pararms(exec_num,nod,obj,edg,tri,con,cyc,tmp,itr,mth,prb,crt):
 
 
 if __name__ == '__main__':
-    params = get_params(5)
+    params = get_params(8)
