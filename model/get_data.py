@@ -5,6 +5,7 @@ Created on Mon Jan  4 15:55:38 2021
 @author: John Meluso
 """
 
+import csv
 import data_manager as dm
 import get_params as gp
 import numpy as np
@@ -45,6 +46,17 @@ def os_setup():
 
         # Executions >= 5
         return outputdir, execnum
+
+
+def get_exec_set(set_num=0):
+    """Defines execution sets and returns specified set."""
+    if set_num == 0: # Test set
+        exec_set = [1,2]
+    elif set_num == 1:
+        exec_set = [1,2,3,4,6,7,8,9]
+    else:
+        print('Not a set. Please check input.')
+    return exec_set
 
 
 def change_filenames_exec001_004(outputdir, execnum, run_list):
@@ -192,8 +204,87 @@ def run_load_incompletes():
     pickle.dump(leftovers_all, open("leftovers.pickle","wb"))
     return leftovers_all
 
+
+def combine_data(outputdir, exec_list):
+    """Combines _summary.csv files for the executions specified as input."""
+
+    # Create empty list for storing data
+    all_summaries = []
+    all_histories = []
+
+    # Iterate over executions provided
+    for execnum in exec_list:
+
+        # Set current search directory
+        curr_dir = outputdir + f'/exec{execnum:03}'
+
+        # Iterate over files in directory
+        for file in os.listdir(curr_dir):
+
+            # Get contents if the file has the summary.csv ending
+            if file.endswith('summary.csv'):
+
+                # Open csv file
+                with open(curr_dir + '/' + file,"r") as csv_file:
+                    reader = csv.reader(csv_file, delimiter=',')
+                    all_summaries.append(next(reader))
+
+            elif file.endswith('history.csv'):
+
+                # Open csv file
+                with open(curr_dir + '/' + file,"r") as csv_file:
+                    reader = csv.reader(csv_file, delimiter=',')
+                    line = next(reader)
+                    all_histories.append([float(xx) for xx in line])
+
+    return all_summaries, all_histories
+
+
+def run_combine_data(exec_set):
+    """Combines specified executions and saves the summary and history data to
+    a single csv for each."""
+
+    # Get variables from platform
+    if sys.platform.startswith('linux'):
+        try:
+            outputdir = str(sys.argv[1])
+
+        except IndexError:
+            sys.exit("Usage: %s outputdir" % sys.argv[0] )
+    else:
+        outputdir = '../data'
+
+    # Get data for specified executions
+    exec_list = get_exec_set(exec_set)
+    all_summaries, all_histories = combine_data(outputdir, exec_list)
+
+    # Write summary results to file
+    filename = outputdir + f'/sets/execset{exec_set:03}_summary.csv'
+    with open(filename, 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file, delimiter=',')
+        for caserun in all_summaries:
+            writer.writerow(caserun)
+
+    # Write history results to file
+    filename = outputdir + f'/sets/execset{exec_set:03}_history.csv'
+    with open(filename, 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file, delimiter=',')
+        for caserun in all_histories:
+            writer.writerow(caserun)
+
+
 if __name__ == '__main__':
-    leftovers = load_incompletes(8)
+    run_combine_data(1)
+
+
+
+
+
+
+
+
+
+
 
 
 
