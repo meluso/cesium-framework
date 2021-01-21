@@ -1,1 +1,1 @@
-sbatch --export=ii=200 submit_test.sbat
+sbatch --export=ii=32 submit_test.sbat

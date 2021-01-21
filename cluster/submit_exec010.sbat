@@ -1,13 +1,13 @@
 #!/bin/bash
 
 #-------------------  Begin SLURM preamble  -------------------------#
-#SBATCH --job-name=cesium_test
+#SBATCH --job-name=cesium_exec010
 #SBATCH --partition=short
 #SBATCH --ntasks=1
 #SBATCH --mem-per-cpu=4000mb
 #SBATCH --time=0-00:30:00
 #SBATCH --mail-type=ALL
-#SBATCH --output=/gpfs1/home/j/m/%u/cesium/logs/test/%x_%j.log
+#SBATCH --output=/gpfs1/home/j/m/%u/cesium/logs/exec010/%x_%j.log
 #-------------------   End SLURM preamble   -------------------------#
 
 # Specify execution number

@@ -70,7 +70,7 @@ def run_simulation(mode="test"):
 
         # Get directory and execution number
         outputdir = '../data/test'
-        execnum = 9
+        execnum = 10
 
         # Get parameters for execution number
         params = gp.get_params(execnum)
