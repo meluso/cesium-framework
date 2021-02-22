@@ -50,7 +50,7 @@ def import_execset(execset=1):
              'y_sys_perf': np.float64}
 
     # Read from CSV file
-    df = pd.read_csv(f'data/sets/execset{execset:03}_summary.csv',
+    df = pd.read_csv(f'../data/sets/execset{execset:03}_summary.csv',
                      names=names, dtype=types)
 
     # Sort the new dataframe by case and run
