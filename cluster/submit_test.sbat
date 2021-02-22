@@ -15,8 +15,8 @@ EXECNUM=10
 
 # Specify log and data directorires
 EXECFMT=$(printf "%03d" $EXECNUM)
-LOGDIR=/gpfs1/home/j/m/jmeluso/cesium/logs/exec$EXECFMT
-JOBDIR=/gpfs2/scratch/jmeluso/cesium/data/exec$EXECFMT
+LOGDIR=/gpfs1/home/j/m/jmeluso/cesium/logs/test
+JOBDIR=/gpfs2/scratch/jmeluso/cesium/data/test
 
 # Make log directory
 if [ ! -d $LOGDIR ] ; then
