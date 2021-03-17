@@ -1,46 +1,49 @@
 # Setup ------------------------------------------------------------------------
 
-# Independent variables to try
-# - Nodes (x_num_nodes) (4 options)
-# - Objective Functions (x_objective_fn) (4 options)
-# - Triangle Formation Probability (x_prob_triangle) (11 options)
-# - System Convergence Threshold (x_conv_threshold) (7 options)
-# - Future Estimate Probability (x_est_prob) (11 options)
-
-# Create array for each input parameter.
-# nod = [50, 100, 500, 1000]
-# obj = ["absolute-sum","sphere","levy","ackley"]
-# edg = [2]
-# tri = np.round(np.arange(0,1.1,0.1),decimals=1)
-# con = np.array([0.01,0.05,0.1,0.5,1,5,10])
-# cyc = [100]
-# tmp = [0.1]
-# itr = [1]
-# mth = ["future"]
-# prb = np.round(np.arange(0,1.1,0.1),decimals=1)
-# crt = [2.62]
-
-# Dependent variables to try
-# - Number of Cycles to Convergence or Timeout (y_num_cycles)
-# - Ending System Performance (y_sys_perf)
-
+    # Independent variables to try
+    # - Nodes (x_num_nodes) (4 options)
+    # - Objective Functions (x_objective_fn) (4 options)
+    # - Triangle Formation Probability (x_prob_triangle) (11 options)
+    # - System Convergence Threshold (x_conv_threshold) (7 options)
+    # - Future Estimate Probability (x_est_prob) (11 options)
+    
+    # Create array for each input parameter.
+    # nod = [50, 100, 500, 1000]
+    # obj = ["absolute-sum","sphere","levy","ackley"]
+    # edg = [2]
+    # tri = np.round(np.arange(0,1.1,0.1),decimals=1)
+    # con = np.array([0.01,0.05,0.1,0.5,1,5,10])
+    # cyc = [100]
+    # tmp = [0.1]
+    # itr = [1]
+    # mth = ["future"]
+    # prb = np.round(np.arange(0,1.1,0.1),decimals=1)
+    # crt = [2.62]
+    
+    # Dependent variables to try
+    # - Number of Cycles to Convergence or Timeout (y_num_cycles)
+    # - Ending System Performance (y_sys_perf)
+    
     # Clear the environment and console
     rm(list = ls())
     cat("\014")
-     
+    
     # Import libraries
     library(ggplot2)
     library(gplots)
     library(fitdistrplus)
     library(estimatr)
-    library(stargazer)
-    # library(lmtest)
-    # library(car)
+    library(modelsummary)
+    library(knitr)
+    library(kableExtra)
+    library(gt)
+    library(tibble)
+    library(magrittr)
+    # library(stargazer)
     library(sandwich)
-    # library(bucky)
     library(MASS)
     library(dplyr)
-
+    
     df <- read.csv("~/GitHub/cesium/data/sets/execset001_summary.csv",
                    header=FALSE)
     names(df) = c('index_case',
@@ -58,7 +61,7 @@
                   'x_anneal_coolrate',
                   'y_num_cycles',
                   'y_sys_perf'
-                  )
+    )
     
     # Slice by objective function
     df_abs <- df[df$x_objective_fn == "absolute-sum",]
@@ -66,287 +69,265 @@
     df_ack <- df[df$x_objective_fn == "ackley",]
     df_lvy <- df[df$x_objective_fn == "levy",]
     
-    robust.se <- function(linmod){
+    robust <- function(linmod){
         cov <- vcovHC(linmod, type = "HC1")
         rse <- sqrt(diag(cov))
     }
-    
 
-# Robust performance regressions test ------------------------------------------
-    
-    # Performance w/ All Objectives
-    perf.all.rse <- lm_robust(log(y_sys_perf)
-                              ~ x_num_nodes
-                              + x_objective_fn
-                              + x_prob_triangle
-                              + poly(x_conv_threshold, 2, raw=TRUE)
-                              + x_est_prob
-                              , data=df
-                              , se_type="stata")
-    summary(perf.all.rse)
-    
-    # Performance w/ Absolute sum only
-    perf.abs.rse <- lm_robust(y_sys_perf
-                              ~ x_num_nodes + I(1/x_num_nodes) + I(1/x_num_nodes^2)
-                              + x_prob_triangle
-                              + x_conv_threshold
-                              + x_est_prob
-                              , data=df_abs
-                              , se_type="stata")
-    summary(perf.abs.rse)
-    
-    # Performance w/ Sphere only
-    perf.sph.rse <- lm_robust(log(y_sys_perf)
-                              ~ x_num_nodes
-                              + x_prob_triangle
-                              + poly(x_conv_threshold, 5, raw=TRUE)
-                              + x_est_prob
-                              , data=df_sph
-                              , se_type="stata")
-    summary(perf.sph.rse)
-    
-    # Performance w/ Ackley only
-    perf.ack.rse <- lm_robust(y_sys_perf
-                              ~ x_num_nodes
-                              + x_prob_triangle
-                              + x_conv_threshold
-                              + x_est_prob
-                              , data=df_ack
-                              , se_type="stata")
-    summary(perf.ack.rse)
-    
-    # Performance w/ Levy only
-    perf.lvy.rse <- lm_robust(y_sys_perf
-                              ~ x_num_nodes
-                              + x_prob_triangle
-                              + x_conv_threshold + I(1/x_conv_threshold)
-                              + x_est_prob
-                              , data=df_lvy
-                              , se_type="stata")
-    summary(perf.lvy.rse)
-    
-    
-        
+
 # Performance Regressions (w/ lm & vcov) ---------------------------------------
-    
+
     # All in one
-    perf.all.se <- lm(log(y_sys_perf)
-                      ~ x_num_nodes
-                      + x_objective_fn
-                      + x_prob_triangle
-                      + poly(x_conv_threshold, 2, raw=TRUE)
-                      + x_est_prob
-                      , data=df)
-    summary(perf.all.se)
+    perf.all <- lm(log(y_sys_perf)
+                   ~ log(x_num_nodes)
+                   + x_objective_fn
+                   + x_prob_triangle
+                   + log(x_conv_threshold)
+                   + x_est_prob
+                   , data=df)
+    summary(perf.all)
+    #plot(perf.all,which=c(2))
+    perf.all.res <- density(resid(perf.all))
+    plot(perf.all.res)
     
     
     # Absolute sum only
-    perf.abs.se <- lm(y_sys_perf
-                      ~ x_num_nodes + I(1/x_num_nodes) + I(1/x_num_nodes^2)
-                      + x_prob_triangle
-                      + x_conv_threshold
-                      + x_est_prob
-                      , data=df_abs)
-    summary(perf.abs.se)
+    perf.abs <- lm(log(y_sys_perf)
+                   ~ log(x_num_nodes)
+                   #+ x_num_nodes + I(1/x_num_nodes) + I(1/x_num_nodes^2)
+                   + x_prob_triangle
+                   #+ x_conv_threshold + I(1/x_conv_threshold) + I(1/x_conv_threshold^2)
+                   + log(x_conv_threshold)
+                   + x_est_prob
+                   , data=df_abs)
+    summary(perf.abs)
+    #plot(perf.abs,which=c(2))
+    perf.abs.res <- density(resid(perf.abs))
+    plot(perf.abs.res)
     
     # Sphere only
-    perf.sph.se <- lm(log(y_sys_perf)
-                      ~ x_num_nodes
-                      + x_prob_triangle
-                      + poly(x_conv_threshold, 5, raw=TRUE)
-                      + x_est_prob
-                      , data=df_sph)
-    summary(perf.sph.se)
+    df_sph$x_ep_poly <- with(df_sph, poly(x_est_prob, degree = 3))[, c(-1)]
+    perf.sph <- lm(log(y_sys_perf)
+                   ~ log(x_num_nodes)
+                   + x_prob_triangle
+                   + log(x_conv_threshold)
+                   + x_est_prob
+                   #+ x_ep_poly
+                   , data=df_sph)
+    summary(perf.sph)
+    #plot(perf.sph,which=c(2))
+    perf.sph.res <- density(resid(perf.sph))
+    plot(perf.sph.res)
     
     # Ackley only
-    perf.ack.se <- lm(y_sys_perf
-                      ~ x_num_nodes
-                      + x_prob_triangle
-                      + x_conv_threshold
-                      + x_est_prob
-                      , data=df_ack)
-    summary(perf.ack.se)
+    perf.ack <- lm(log(y_sys_perf)
+                   ~ log(x_num_nodes)
+                   + x_prob_triangle
+                   + log(x_conv_threshold)
+                   + x_est_prob
+                   , data=df_ack)
+    summary(perf.ack)
+    #plot(perf.ack,which=c(2))
+    perf.ack.res <- density(resid(perf.ack))
+    plot(perf.ack.res)
     
     # Levy only
-    perf.lvy.se <- lm(y_sys_perf
-                      ~ x_num_nodes
-                      + x_prob_triangle
-                      + x_conv_threshold + I(1/x_conv_threshold)
-                      + x_est_prob
-                      , data=df_lvy)
-    summary(perf.lvy.se)
+    perf.lvy <- lm(log(y_sys_perf)
+                   ~ log(x_num_nodes)
+                   + x_prob_triangle
+                   + log(x_conv_threshold)
+                   + x_est_prob
+                   , data=df_lvy)
+    summary(perf.lvy)
+    #plot(perf.lvy,which=c(2))
+    perf.lvy.res <- density(resid(perf.lvy))
+    plot(perf.lvy.res)
 
 
-# Robust cycle regressions test ------------------------------------------------
+    ### Performance Latex Tables ###
+
+    # Rename functions
+    mod_list = list()
+    mod_list[['All Functions']] <- perf.all
+    mod_list[['Absolute-Sum']] <- perf.abs
+    mod_list[['Sphere']] <- perf.sph
+    mod_list[['Ackley']] <- perf.ack
+    mod_list[['Levy']] <- perf.lvy
     
-    # Performance w/ All Objectives
-    perf.all.rse <- lm_robust(log(y_sys_perf)
-                              ~ x_num_nodes
-                              + x_objective_fn
-                              + x_prob_triangle
-                              + poly(x_conv_threshold, 2, raw=TRUE)
-                              + x_est_prob
-                              , data=df
-                              , se_type="stata")
-    summary(perf.all.rse)
+    # Insert dependent variable
+    rows <- tribble(~term, ~M1, ~M2, ~M3, ~M4, ~M5,
+                    'Dependent Variable',
+                    'log(Sys. Perf.)',
+                    'log(Sys. Perf.)',
+                    'log(Sys. Perf.)',
+                    'log(Sys. Perf.)',
+                    'log(Sys. Perf.)',
+                    '','','','','','')
+    attr(rows, 'position') <- c(1,2)
     
-    # Performance w/ Absolute sum only
-    perf.abs.rse <- lm_robust(y_sys_perf
-                              ~ x_num_nodes + I(1/x_num_nodes) + I(1/x_num_nodes^2)
-                              + x_prob_triangle
-                              + x_conv_threshold
-                              + x_est_prob
-                              , data=df_abs
-                              , se_type="stata")
-    summary(perf.abs.rse)
+    # Create rows
+    cm = c('(Intercept)' = 'Constant',
+           'x_objective_fnsphere' = 'Fn: Sphere',
+           'x_objective_fnackley' = 'Fn: Ackley',
+           'x_objective_fnlevy' = 'Fn: Levy',
+           'log(x_num_nodes)' = 'log(Number of Nodes)',
+           'log(x_conv_threshold)' = 'log(Convergence Threshold)',
+           'x_prob_triangle' = 'Triangle Probability',
+           'x_est_prob' = 'Future Estimate Probability',
+           'x_ep_poly2' = '(Future Estimate Probability)^2',
+           'x_ep_poly3' = '(Future Estimate Probability)^3'
+    )
     
-    # Performance w/ Sphere only
-    perf.sph.rse <- lm_robust(log(y_sys_perf)
-                              ~ x_num_nodes
-                              + x_prob_triangle
-                              + poly(x_conv_threshold, 5, raw=TRUE)
-                              + x_est_prob
-                              , data=df_sph
-                              , se_type="stata")
-    summary(perf.sph.rse)
+    # Construct table
+    tab = modelsummary(mod_list,
+                       add_rows = rows,
+                       coef_map = cm,
+                       gof_omit = 'IC|Log',
+                       output = 'latex',
+                       stars = c('+' = .05, '*' = 0.01, '**' = 0.005, '***' = 0.001),
+                       vcov = 'stata'
+    )
     
-    # Performance w/ Ackley only
-    perf.ack.rse <- lm_robust(y_sys_perf
-                              ~ x_num_nodes
-                              + x_prob_triangle
-                              + x_conv_threshold
-                              + x_est_prob
-                              , data=df_ack
-                              , se_type="stata")
-    summary(perf.ack.rse)
-    
-    # Performance w/ Levy only
-    perf.lvy.rse <- lm_robust(y_sys_perf
-                              ~ x_num_nodes
-                              + x_prob_triangle
-                              + x_conv_threshold + I(1/x_conv_threshold)
-                              + x_est_prob
-                              , data=df_lvy
-                              , se_type="stata")
-    summary(perf.lvy.rse)
-    
+    # Save to file
+    save_kable(tab,file = "C:/Users/Juango the Blue/Documents/GitHub/cesium/figures/table_reg_perf.tex")
     
     
 # Cycle Regressions (w/ lm & vcov) ---------------------------------------
     
     # All in one
-    perf.all.se <- lm(log(y_sys_perf)
-                      ~ x_num_nodes
-                      + x_objective_fn
-                      + x_prob_triangle
-                      + poly(x_conv_threshold, 2, raw=TRUE)
-                      + x_est_prob
-                      , data=df)
-    summary(perf.all.se)
+    cycl.all <- lm(log(y_num_cycles)
+                   ~ log(x_num_nodes)
+                   + x_objective_fn
+                   + x_prob_triangle
+                   + log(x_conv_threshold)
+                   + x_est_prob
+                   , data=df)
+    summary(cycl.all)
+    #plot(cycl.all,which=c(2))
+    cycl.all.res <- density(resid(cycl.all))
+    plot(cycl.all.res)
     
     
     # Absolute sum only
-    perf.abs.se <- lm(y_sys_perf
-                      ~ x_num_nodes + I(1/x_num_nodes) + I(1/x_num_nodes^2)
-                      + x_prob_triangle
-                      + x_conv_threshold
-                      + x_est_prob
-                      , data=df_abs)
-    summary(perf.abs.se)
+    cycl.abs <- lm(log(y_num_cycles)
+                   ~ log(x_num_nodes)
+                   + x_prob_triangle
+                   + log(x_conv_threshold)
+                   + x_est_prob
+                   , data=df_abs)
+    summary(cycl.abs)
+    #plot(cycl.abs,which=c(2))
+    cycl.abs.res <- density(resid(cycl.abs))
+    plot(cycl.abs.res)
     
     # Sphere only
-    perf.sph.se <- lm(log(y_sys_perf)
-                      ~ x_num_nodes
-                      + x_prob_triangle
-                      + poly(x_conv_threshold, 5, raw=TRUE)
-                      + x_est_prob
-                      , data=df_sph)
-    summary(perf.sph.se)
+    cycl.sph <- lm(log(y_num_cycles)
+                   ~ log(x_num_nodes)
+                   + x_prob_triangle
+                   + log(x_conv_threshold)
+                   + x_est_prob
+                   , data=df_sph)
+    summary(cycl.sph)
+    #plot(cycl.sph,which=c(2))
+    cycl.sph.res <- density(resid(cycl.sph))
+    plot(cycl.sph.res)
     
     # Ackley only
-    perf.ack.se <- lm(y_sys_perf
-                      ~ x_num_nodes
-                      + x_prob_triangle
-                      + x_conv_threshold
-                      + x_est_prob
-                      , data=df_ack)
-    summary(perf.ack.se)
+    cycl.ack <- lm(log(y_num_cycles)
+                   ~ log(x_num_nodes)
+                   + x_prob_triangle
+                   + log(x_conv_threshold)
+                   + x_est_prob
+                   , data=df_ack)
+    summary(cycl.ack)
+    #plot(cycl.ack,which=c(2))
+    cycl.ack.res <- density(resid(cycl.ack))
+    plot(cycl.ack.res)
     
     # Levy only
-    perf.lvy.se <- lm(y_sys_perf
-                      ~ x_num_nodes
-                      + x_prob_triangle
-                      + x_conv_threshold + I(1/x_conv_threshold)
-                      + x_est_prob
-                      , data=df_lvy)
-    summary(perf.lvy.se)    
-    
-        
-# Latex Tables -----------------------------------------------------------------
+    df_lvy$x_ep_poly <- with(df_lvy, poly(x_est_prob, degree = 2))[, c(-1)]
+    cycl.lvy <- lm(log(y_num_cycles)
+                   ~ log(x_num_nodes)
+                   + x_prob_triangle
+                   + x_conv_threshold
+                   + x_est_prob
+                   + x_ep_poly
+                   , data=df_lvy)
+    summary(cycl.lvy)
+    #plot(cycl.lvy,which=c(2))
+    cycl.lvy.res <- density(resid(cycl.lvy))
+    plot(cycl.lvy.res)
 
-    stargazer(
-        perf.all.se,
-        perf.abs.se,
-        perf.sph.se,
-        perf.ack.se,
-        perf.lvy.se,
-        se=c(
-            robust.se(perf.all.se),
-            robust.se(perf.abs.se),
-            robust.se(perf.sph.se),
-            robust.se(perf.ack.se),
-            robust.se(perf.lvy.se)
-        ),
-        column.labels = c(
-            "All Fns",
-            "Absolute-Sum Fn",
-            "Sphere Fn",
-            "Ackley Fn",
-            "Levy Fn"
-        ),
-        omit.stat = "f", single.row=TRUE, digits = 3, intercept.top = TRUE,
-        intercept.bottom = FALSE, df = FALSE,
-        star.char = c(".", "*", "**", "***"),
-        star.cutoffs = c(.05, .01, .001, 0)
-        )
-
-# Horsing Around ---------------------------------------------------------------
     
-    perf.all.cross <- lm(y_sys_perf
-                         ~ x_objective_fn
-                         + x_num_nodes
-                         + x_prob_triangle
-                         + x_conv_threshold
-                         + x_est_prob
-                         + x_objective_fn*x_num_nodes
-                         + x_objective_fn*x_prob_triangle
-                         + x_objective_fn*x_conv_threshold
-                         + x_objective_fn*x_est_prob
-                         + x_num_nodes*x_prob_triangle
-                         + x_num_nodes*x_conv_threshold
-                         + x_num_nodes*x_est_prob
-                         + x_prob_triangle*x_conv_threshold
-                         + x_prob_triangle*x_est_prob
-                         + x_conv_threshold*x_est_prob
-                         , data=df)
-    summary(perf.all.cross)
+    ### Cycles Latex Tables ###
     
-    cycl.all.cross <- lm(y_num_cycles
-                         ~ x_objective_fn
-                         + x_num_nodes
-                         + x_prob_triangle
-                         + x_conv_threshold
-                         + x_est_prob
-                         + x_objective_fn*x_num_nodes
-                         + x_objective_fn*x_prob_triangle
-                         + x_objective_fn*x_conv_threshold
-                         + x_objective_fn*x_est_prob
-                         + x_num_nodes*x_prob_triangle
-                         + x_num_nodes*x_conv_threshold
-                         + x_num_nodes*x_est_prob
-                         + x_prob_triangle*x_conv_threshold
-                         + x_prob_triangle*x_est_prob
-                         + x_conv_threshold*x_est_prob
-                         , data=df)
-    summary(cycl.all.cross)
+    # Rename functions
+    mod_list = list()
+    mod_list[['All Functions']] <- cycl.all
+    mod_list[['Absolute-Sum']] <- cycl.abs
+    mod_list[['Sphere']] <- cycl.sph
+    mod_list[['Ackley']] <- cycl.ack
+    mod_list[['Levy']] <- cycl.lvy
+    
+    # Insert dependent variable
+    rows <- tribble(~term, ~M1, ~M2, ~M3, ~M4, ~M5,
+                    'Dependent Variable',
+                    'log(Num. Cycles)',
+                    'log(Num. Cycles)',
+                    'log(Num. Cycles)',
+                    'log(Num. Cycles)',
+                    'log(Num. Cycles)',
+                    '','','','','','')
+    attr(rows, 'position') <- c(1,2)
+    
+    # Create rows
+    cm = c('(Intercept)' = 'Constant',
+           'x_objective_fnsphere' = 'Fn: Sphere',
+           'x_objective_fnackley' = 'Fn: Ackley',
+           'x_objective_fnlevy' = 'Fn: Levy',
+           'log(x_num_nodes)' = 'log(Number of Nodes)',
+           'log(x_conv_threshold)' = 'log(Convergence Threshold)',
+           'x_prob_triangle' = 'Triangle Probability',
+           'x_est_prob' = 'Future Estimate Probability',
+           'x_ep_poly' = '(Future Estimate Probability)^2'
+    )
+    
+    # Construct table
+    tab = modelsummary(mod_list,
+                       add_rows = rows,
+                       coef_map = cm,
+                       gof_omit = 'IC|Log',
+                       output = 'latex',
+                       stars = c('+' = .05, '*' = 0.01, '**' = 0.005, '***' = 0.001),
+                       vcov = 'stata'
+    )
+    
+    # Save to file
+    save_kable(tab,file = "C:/Users/Juango the Blue/Documents/GitHub/cesium/figures/table_reg_cycl.tex")
 
+    
+# Save Distributions -----------------------------------------------------------
+    
+    dist.perf.x = data.frame(perf.all.res$x,
+                             perf.abs.res$x,
+                             perf.sph.res$x,
+                             perf.ack.res$x,
+                             perf.lvy.res$x)
+    
+    dist.perf.y = data.frame(perf.all.res$y,
+                             perf.abs.res$y,
+                             perf.sph.res$y,
+                             perf.ack.res$y,
+                             perf.lvy.res$y)
+    
+    dist.cycl.x = data.frame(cycl.all.res$x,
+                             cycl.abs.res$x,
+                             cycl.sph.res$x,
+                             cycl.ack.res$x,
+                             cycl.lvy.res$x)
+    
+    dist.cycl.y = data.frame(cycl.all.res$y,
+                             cycl.abs.res$y,
+                             cycl.sph.res$y,
+                             cycl.ack.res$y,
+                             cycl.lvy.res$y)

@@ -131,6 +131,7 @@ class System(object):
         # Vector (old and new) of the agents' returned values
         self.vect = [ag.Obj_Eval() for i in range(n)]
         self.vect_new = [ag.Obj_Eval() for i in range(n)]
+        self.archive = []
 
 		# Generate the system history if needed
         if self.mthd == "future":
@@ -157,6 +158,7 @@ class System(object):
 
         # Transfer new values to system as current system design
         self.vect = self.vect_new
+        self.archive.append([self.vect[i].x.copy() for i in range(self.n)])
 
 
     def __repr__(self):
@@ -236,6 +238,7 @@ class System(object):
 
         # Record all system design values returned by agents
         self.vect = self.vect_new
+        self.archive.append([self.vect[i].x.copy() for i in range(self.n)])
 
 
     def run(self):

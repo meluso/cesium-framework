@@ -327,8 +327,212 @@
         ),
         omit.stat = "f")
 
-
-
-
-
-
+# Robust performance regressions test ------------------------------------------
+    
+    # Performance w/ All Objectives
+    perf.all.rse <- lm_robust(log(y_sys_perf)
+                              ~ x_num_nodes
+                              + x_objective_fn
+                              + x_prob_triangle
+                              + poly(x_conv_threshold, 2, raw=TRUE)
+                              + x_est_prob
+                              , data=df
+                              , se_type="stata")
+    summary(perf.all.rse)
+    shapiro.test(perf.all.res)
+    
+    # Performance w/ Absolute sum only
+    perf.abs.rse <- lm_robust(y_sys_perf
+                              ~ x_num_nodes + I(1/x_num_nodes) + I(1/x_num_nodes^2)
+                              + x_prob_triangle
+                              + x_conv_threshold
+                              + x_est_prob
+                              , data=df_abs
+                              , se_type="stata")
+    summary(perf.abs.rse)
+    
+    # Performance w/ Sphere only
+    perf.sph.rse <- lm_robust(log(y_sys_perf)
+                              ~ x_num_nodes
+                              + x_prob_triangle
+                              + poly(x_conv_threshold, 5, raw=TRUE)
+                              + x_est_prob
+                              , data=df_sph
+                              , se_type="stata")
+    summary(perf.sph.rse)
+    
+    # Performance w/ Ackley only
+    perf.ack.rse <- lm_robust(y_sys_perf
+                              ~ x_num_nodes
+                              + x_prob_triangle
+                              + x_conv_threshold
+                              + x_est_prob
+                              , data=df_ack
+                              , se_type="stata")
+    summary(perf.ack.rse)
+    
+    # Performance w/ Levy only
+    perf.lvy.rse <- lm_robust(y_sys_perf
+                              ~ x_num_nodes
+                              + x_prob_triangle
+                              + x_conv_threshold + I(1/x_conv_threshold)
+                              + x_est_prob
+                              , data=df_lvy
+                              , se_type="stata")
+    summary(perf.lvy.rse)
+    
+    
+    
+# Performance Regressions (w/ lm & vcov) ---------------------------------------
+    
+    # All in one
+    perf.all.se <- lm(log(y_sys_perf)
+                      ~ x_num_nodes
+                      + x_objective_fn
+                      + x_prob_triangle
+                      + poly(x_conv_threshold, 2, raw=TRUE)
+                      + x_est_prob
+                      , data=df)
+    summary(perf.all.se)
+    
+    
+    # Absolute sum only
+    perf.abs.se <- lm(y_sys_perf
+                      ~ x_num_nodes + I(1/x_num_nodes) + I(1/x_num_nodes^2)
+                      + x_prob_triangle
+                      + x_conv_threshold
+                      + x_est_prob
+                      , data=df_abs)
+    summary(perf.abs.se)
+    
+    # Sphere only
+    perf.sph.se <- lm(log(y_sys_perf)
+                      ~ x_num_nodes
+                      + x_prob_triangle
+                      + poly(x_conv_threshold, 5, raw=TRUE)
+                      + x_est_prob
+                      , data=df_sph)
+    summary(perf.sph.se)
+    
+    # Ackley only
+    perf.ack.se <- lm(y_sys_perf
+                      ~ x_num_nodes
+                      + x_prob_triangle
+                      + x_conv_threshold
+                      + x_est_prob
+                      , data=df_ack)
+    summary(perf.ack.se)
+    
+    # Levy only
+    perf.lvy.se <- lm(y_sys_perf
+                      ~ x_num_nodes
+                      + x_prob_triangle
+                      + x_conv_threshold + I(1/x_conv_threshold)
+                      + x_est_prob
+                      , data=df_lvy)
+    summary(perf.lvy.se)
+    
+    
+# Robust cycle regressions test ------------------------------------------------
+    
+    # Performance w/ All Objectives
+    perf.all.rse <- lm_robust(log(y_sys_perf)
+                              ~ x_num_nodes
+                              + x_objective_fn
+                              + x_prob_triangle
+                              + poly(x_conv_threshold, 2, raw=TRUE)
+                              + x_est_prob
+                              , data=df
+                              , se_type="stata")
+    summary(perf.all.rse)
+    
+    # Performance w/ Absolute sum only
+    perf.abs.rse <- lm_robust(y_sys_perf
+                              ~ x_num_nodes + I(1/x_num_nodes) + I(1/x_num_nodes^2)
+                              + x_prob_triangle
+                              + x_conv_threshold
+                              + x_est_prob
+                              , data=df_abs
+                              , se_type="stata")
+    summary(perf.abs.rse)
+    
+    # Performance w/ Sphere only
+    perf.sph.rse <- lm_robust(log(y_sys_perf)
+                              ~ x_num_nodes
+                              + x_prob_triangle
+                              + poly(x_conv_threshold, 5, raw=TRUE)
+                              + x_est_prob
+                              , data=df_sph
+                              , se_type="stata")
+    summary(perf.sph.rse)
+    
+    # Performance w/ Ackley only
+    perf.ack.rse <- lm_robust(y_sys_perf
+                              ~ x_num_nodes
+                              + x_prob_triangle
+                              + x_conv_threshold
+                              + x_est_prob
+                              , data=df_ack
+                              , se_type="stata")
+    summary(perf.ack.rse)
+    
+    # Performance w/ Levy only
+    perf.lvy.rse <- lm_robust(y_sys_perf
+                              ~ x_num_nodes
+                              + x_prob_triangle
+                              + x_conv_threshold + I(1/x_conv_threshold)
+                              + x_est_prob
+                              , data=df_lvy
+                              , se_type="stata")
+    summary(perf.lvy.rse)
+    
+    
+    
+# Cycle Regressions (w/ lm & vcov) ---------------------------------------
+    
+    # All in one
+    perf.all.se <- lm(log(y_sys_perf)
+                      ~ x_num_nodes
+                      + x_objective_fn
+                      + x_prob_triangle
+                      + poly(x_conv_threshold, 2, raw=TRUE)
+                      + x_est_prob
+                      , data=df)
+    summary(perf.all.se)
+    
+    
+    # Absolute sum only
+    perf.abs.se <- lm(y_sys_perf
+                      ~ x_num_nodes + I(1/x_num_nodes) + I(1/x_num_nodes^2)
+                      + x_prob_triangle
+                      + x_conv_threshold
+                      + x_est_prob
+                      , data=df_abs)
+    summary(perf.abs.se)
+    
+    # Sphere only
+    perf.sph.se <- lm(log(y_sys_perf)
+                      ~ x_num_nodes
+                      + x_prob_triangle
+                      + poly(x_conv_threshold, 5, raw=TRUE)
+                      + x_est_prob
+                      , data=df_sph)
+    summary(perf.sph.se)
+    
+    # Ackley only
+    perf.ack.se <- lm(y_sys_perf
+                      ~ x_num_nodes
+                      + x_prob_triangle
+                      + x_conv_threshold
+                      + x_est_prob
+                      , data=df_ack)
+    summary(perf.ack.se)
+    
+    # Levy only
+    perf.lvy.se <- lm(y_sys_perf
+                      ~ x_num_nodes
+                      + x_prob_triangle
+                      + x_conv_threshold + I(1/x_conv_threshold)
+                      + x_est_prob
+                      , data=df_lvy)
+    summary(perf.lvy.se)    
