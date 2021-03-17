@@ -14,6 +14,7 @@ import data_import as di
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
+
 def mean_ci(data, confidence=0.95):
     a = 1.0 * np.array(data)
     n = len(a)
@@ -52,7 +53,7 @@ for jj in np.arange(len(obj)):
     for xx in np.arange(len(xvar)):
 
         # Create Figure to plot yvars
-        fig1, axs1 = plt.subplots(1,len(yvar))
+        fig1, axs1 = plt.subplots(2,len(yvar))
         fig2, axs2 = plt.subplots()
         fig1.suptitle(obj[jj])
         fig2.suptitle(obj[jj] + ' + ' + xvar[xx])
@@ -88,12 +89,19 @@ for jj in np.arange(len(obj)):
                 df2obj2desc[obj[jj]][xvar[xx]][yvar[yy]]['std'].append(std)
 
             # Plot data for yvar
-            axs1[yy].set_xlabel(xvar[xx])
-            axs1[yy].set_ylabel(yvar[yy])
-            axs1[yy].errorbar(x=df2obj2desc[obj[jj]][xvar[xx]][yvar[yy]]['group'],
-                              y=df2obj2desc[obj[jj]][xvar[xx]][yvar[yy]]['mean'],
-                              yerr=df2obj2desc[obj[jj]][xvar[xx]][yvar[yy]]['ci'],
-                              ls='',lw=1,marker='o',ms=5)
+            axs1[0,yy].set_xlabel(xvar[xx])
+            axs1[0,yy].set_ylabel(yvar[yy])
+            axs1[0,yy].errorbar(x=df2obj2desc[obj[jj]][xvar[xx]][yvar[yy]]['group'],
+                                y=df2obj2desc[obj[jj]][xvar[xx]][yvar[yy]]['mean'],
+                                yerr=df2obj2desc[obj[jj]][xvar[xx]][yvar[yy]]['ci'],
+                                ls='',lw=1,marker='o',ms=5)
+            axs1[1,yy].set_xlabel(xvar[xx])
+            axs1[1,yy].set_ylabel('log(' + str(yvar[yy]) + ')')
+            axs1[1,yy].errorbar(x=df2obj2desc[obj[jj]][xvar[xx]][yvar[yy]]['group'],
+                                y=df2obj2desc[obj[jj]][xvar[xx]][yvar[yy]]['mean'],
+                                yerr=df2obj2desc[obj[jj]][xvar[xx]][yvar[yy]]['ci'],
+                                ls='',lw=1,marker='o',ms=5)
+            axs1[1,yy].set_yscale('log')
 
         # Plot Pareto fronts
         axs2.set_xlabel('y_num_cycles')
