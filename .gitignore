@@ -102,5 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-data/*/
+
+# archive
 archive
+
+# data
+data/*/
+!data/sets/
+data/sets/*
+!data/sets/execset001_summary.zip
