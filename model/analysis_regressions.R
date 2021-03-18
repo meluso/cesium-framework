@@ -44,149 +44,180 @@
     library(MASS)
     library(dplyr)
     
+    # Import data
     df <- read.csv("~/GitHub/cesium/data/sets/execset001_summary.csv",
                    header=FALSE)
-    names(df) = c('index_case',
-                  'index_run',
-                  'x_num_nodes', # nod = [50, 100, 500, 1000]
+    df <- df[c(3:4,6:7,12,14:15)]
+    # Name variables
+    names(df) = c('x_num_nodes', # nod = [50, 100, 500, 1000]
                   'x_objective_fn', # obj = ["absolute-sum","sphere","levy","ackley"]
-                  'x_num_edges',
                   'x_prob_triangle', # tri = np.round(np.arange(0,1.1,0.1),decimals=1)
                   'x_conv_threshold', # con = np.array([0.01,0.05,0.1,0.5,1,5,10])
-                  'x_max_cycles',
-                  'x_init_temp',
-                  'x_anneal_iter',
-                  'x_est_method',
                   'x_est_prob', # prb = np.round(np.arange(0,1.1,0.1),decimals=1)
-                  'x_anneal_coolrate',
                   'y_num_cycles',
                   'y_sys_perf'
     )
-    
-    # Slice by objective function
-    df_abs <- df[df$x_objective_fn == "absolute-sum",]
-    df_sph <- df[df$x_objective_fn == "sphere",]
-    df_ack <- df[df$x_objective_fn == "ackley",]
-    df_lvy <- df[df$x_objective_fn == "levy",]
     
     robust <- function(linmod){
         cov <- vcovHC(linmod, type = "HC1")
         rse <- sqrt(diag(cov))
     }
+    
+    # Slice by objective function
+    df_abs <- df[df$x_objective_fn == "absolute-sum",-c(2)]
+    df_sph <- df[df$x_objective_fn == "sphere",-c(2)]
+    df_ack <- df[df$x_objective_fn == "ackley",-c(2)]
+    df_lvy <- df[df$x_objective_fn == "levy",-c(2)]
 
 
 # Performance Regressions (w/ lm & vcov) ---------------------------------------
 
-    # All in one
-    perf.all <- lm(log(y_sys_perf)
-                   ~ log(x_num_nodes)
-                   + x_objective_fn
-                   + x_prob_triangle
-                   + log(x_conv_threshold)
-                   + x_est_prob
-                   , data=df)
-    summary(perf.all)
-    #plot(perf.all,which=c(2))
-    perf.all.res <- density(resid(perf.all))
-    plot(perf.all.res)
+    # All in one 1
+    perf.all1 <- lm(y_sys_perf ~ . - y_num_cycles, data=df)
+    summary(perf.all1)
+    #perf.all1.res <- density(resid(perf.all1))
+    #plot(perf.all1.res)
     
+    # All in one 2
+    perf.all2 <- lm(y_sys_perf ~ (. - y_num_cycles)*(. - y_num_cycles), data=df)
+    summary(perf.all2)
+    #perf.all2.res <- density(resid(perf.all2))
+    #plot(perf.all2.res)
+    
+    # All in one 3
+    perf.all3 <- lm(y_sys_perf ~ (. - y_num_cycles)*(. - y_num_cycles)*(. - y_num_cycles - x_objective_fn), data=df)
+    summary(perf.all3)
+    #perf.all3.res <- density(resid(perf.all3))
+    #plot(perf.all3.res)
+    
+    # All in one 4
+    perf.all4 <- lm(y_sys_perf ~ x_objective_fn*(. - y_num_cycles - x_objective_fn), data=df)
+    summary(perf.all4)
+    #perf.all4.res <- density(resid(perf.all4))
+    #plot(perf.all4.res)
     
     # Absolute sum only
-    perf.abs <- lm(log(y_sys_perf)
-                   ~ log(x_num_nodes)
-                   #+ x_num_nodes + I(1/x_num_nodes) + I(1/x_num_nodes^2)
-                   + x_prob_triangle
-                   #+ x_conv_threshold + I(1/x_conv_threshold) + I(1/x_conv_threshold^2)
-                   + log(x_conv_threshold)
-                   + x_est_prob
-                   , data=df_abs)
+    perf.abs <- lm(y_sys_perf ~ (. - y_num_cycles)*(. - y_num_cycles), data=df_abs)
     summary(perf.abs)
-    #plot(perf.abs,which=c(2))
-    perf.abs.res <- density(resid(perf.abs))
-    plot(perf.abs.res)
+    #perf.abs.res <- density(resid(perf.abs))
+    #plot(perf.abs.res)
     
-    # Sphere only
-    df_sph$x_ep_poly <- with(df_sph, poly(x_est_prob, degree = 3))[, c(-1)]
-    perf.sph <- lm(log(y_sys_perf)
-                   ~ log(x_num_nodes)
-                   + x_prob_triangle
-                   + log(x_conv_threshold)
-                   + x_est_prob
-                   #+ x_ep_poly
-                   , data=df_sph)
-    summary(perf.sph)
-    #plot(perf.sph,which=c(2))
-    perf.sph.res <- density(resid(perf.sph))
-    plot(perf.sph.res)
+    # Sphere only 1
+    perf.sph1 <- lm(y_sys_perf ~ (. - y_num_cycles)*(. - y_num_cycles), data=df_sph)
+    summary(perf.sph1)
+    #perf.sph1.res <- density(resid(perf.sph1))
+    #plot(perf.sph1.res)
     
     # Ackley only
-    perf.ack <- lm(log(y_sys_perf)
-                   ~ log(x_num_nodes)
-                   + x_prob_triangle
-                   + log(x_conv_threshold)
-                   + x_est_prob
-                   , data=df_ack)
+    perf.ack <- lm(y_sys_perf ~ (. - y_num_cycles)*(. - y_num_cycles), data=df_ack)
     summary(perf.ack)
-    #plot(perf.ack,which=c(2))
-    perf.ack.res <- density(resid(perf.ack))
-    plot(perf.ack.res)
+    #perf.ack.res <- density(resid(perf.ack))
+    #plot(perf.ack.res)
     
     # Levy only
-    perf.lvy <- lm(log(y_sys_perf)
-                   ~ log(x_num_nodes)
-                   + x_prob_triangle
-                   + log(x_conv_threshold)
-                   + x_est_prob
-                   , data=df_lvy)
+    perf.lvy <- lm(y_sys_perf ~ (. - y_num_cycles)*(. - y_num_cycles), data=df_lvy)
     summary(perf.lvy)
-    #plot(perf.lvy,which=c(2))
-    perf.lvy.res <- density(resid(perf.lvy))
-    plot(perf.lvy.res)
+    #perf.lvy.res <- density(resid(perf.lvy))
+    #plot(perf.lvy.res)
+    
+    # Transforms Sphere variables
+    x_nn_log <- log(df_sph$x_num_nodes)
+    df_sph$x_num_nodes <- x_nn_log
+    x_ct_log <- log(df_sph$x_conv_threshold)
+    df_sph$x_conv_threshold <- x_ct_log
+    
+    # Sphere only 2
+    perf.sph2 <- lm(log(y_sys_perf) ~ (. - y_num_cycles)*(. - y_num_cycles) , data=df_sph)
+    summary(perf.sph2)
+    #perf.sph2.res <- density(resid(perf.sph2))
+    #plot(perf.sph2.res)
 
 
-    ### Performance Latex Tables ###
+# Performance Latex Tables -----------------------------------------------------
 
     # Rename functions
     mod_list = list()
-    mod_list[['All Functions']] <- perf.all
-    mod_list[['Absolute-Sum']] <- perf.abs
-    mod_list[['Sphere']] <- perf.sph
-    mod_list[['Ackley']] <- perf.ack
-    mod_list[['Levy']] <- perf.lvy
+    mod_list[['Model II.1']] <- perf.all1
+    mod_list[['Model II.2']] <- perf.all2
+    mod_list[['Model II.3']] <- perf.abs
+    mod_list[['Model II.4']] <- perf.sph1
+    mod_list[['Model II.7']] <- perf.sph2
+    mod_list[['Model II.5']] <- perf.ack
+    mod_list[['Model II.6']] <- perf.lvy
+    
+    # Set Objective Function Column Headers
+    spanlist = c(" " = 1,
+                 "All Functions" = 2,
+                 "Absolute Sum" = 1,
+                 "Sphere" = 2,
+                 "Ackley" = 1,
+                 "Levy" = 1)
     
     # Insert dependent variable
-    rows <- tribble(~term, ~M1, ~M2, ~M3, ~M4, ~M5,
+    rows <- tribble(~term, ~M1, ~M2, ~M3, ~M4, ~M5, ~M6, ~M7,
                     'Dependent Variable',
+                    'Sys. Perf.',
+                    'Sys. Perf.',
+                    'Sys. Perf.',
+                    'Sys. Perf.',
                     'log(Sys. Perf.)',
-                    'log(Sys. Perf.)',
-                    'log(Sys. Perf.)',
-                    'log(Sys. Perf.)',
-                    'log(Sys. Perf.)',
-                    '','','','','','')
+                    'Sys. Perf.',
+                    'Sys. Perf.',
+                    '','','','','','','',''
+                    )
     attr(rows, 'position') <- c(1,2)
     
     # Create rows
-    cm = c('(Intercept)' = 'Constant',
-           'x_objective_fnsphere' = 'Fn: Sphere',
-           'x_objective_fnackley' = 'Fn: Ackley',
-           'x_objective_fnlevy' = 'Fn: Levy',
-           'log(x_num_nodes)' = 'log(Number of Nodes)',
-           'log(x_conv_threshold)' = 'log(Convergence Threshold)',
-           'x_prob_triangle' = 'Triangle Probability',
-           'x_est_prob' = 'Future Estimate Probability',
-           'x_ep_poly2' = '(Future Estimate Probability)^2',
-           'x_ep_poly3' = '(Future Estimate Probability)^3'
+    cm = c(
+        '(Intercept)' = 'Constant',
+        'x_objective_fnsphere' = 'Fn: Sphere',
+        'x_objective_fnackley' = 'Fn: Ackley',
+        'x_objective_fnlevy' = 'Fn: Levy',
+        'x_num_nodes' = 'Num. Nodes',
+        'x_prob_triangle' = 'Tri. Prob.',
+        'x_conv_threshold' = 'Conv. Thresh.',
+        'x_est_prob' = 'Fut. Est. Prob.',
+        'x_num_nodes:x_prob_triangle' = 'Num. Nodes x Tri. Prob.',
+        'x_num_nodes:x_conv_threshold' = 'Num. Nodes x Conv. Thresh.',
+        'x_num_nodes:x_est_prob' = 'Num. Nodes x Fut. Est. Prob.',
+        'x_prob_triangle:x_conv_threshold' = 'Tri. Prob. x Conv. Thresh.',
+        'x_prob_triangle:x_est_prob' = 'Tri. Prob. x Fut. Est. Prob.',
+        'x_conv_threshold:x_est_prob' = 'Conv. Thresh. x Fut. Est. Prob.',
+        'x_num_nodes:x_objective_fnsphere' = 'Fn: Sphere x Num. Nodes',
+        'x_objective_fnsphere:x_prob_triangle' = 'Fn: Sphere x Tri. Prob.',
+        'x_objective_fnsphere:x_conv_threshold' = 'Fn: Sphere x Conv. Thresh.',
+        'x_objective_fnsphere:x_est_prob' = 'Fn: Sphere x Fut. Est. Prob.',
+        'x_num_nodes:x_objective_fnackley' = 'Fn: Ackley x Num. Nodes',
+        'x_objective_fnackley:x_prob_triangle' = 'Fn: Ackley x Tri. Prob.',
+        'x_objective_fnackley:x_conv_threshold' = 'Fn: Ackley x Conv. Thresh.',
+        'x_objective_fnackley:x_est_prob' = 'Fn: Ackley x Fut. Est. Prob.',
+        'x_num_nodes:x_objective_fnlevy' = 'Fn: Levy x Num. Nodes',
+        'x_objective_fnlevy:x_prob_triangle' = 'Fn: Levy x Tri. Prob.',
+        'x_objective_fnlevy:x_conv_threshold' = 'Fn: Levy x Conv. Thresh.',
+        'x_objective_fnlevy:x_est_prob' = 'Fn: Levy x Fut. Est. Prob.'
     )
+    
+    # Add a note about log variables
+    notes = list('Variable log-transformed for Model II.7 only')
+    
+    # Update stats to include
+    gm <- modelsummary::gof_map
+    gm$omit <- FALSE
     
     # Construct table
     tab = modelsummary(mod_list,
                        add_rows = rows,
                        coef_map = cm,
-                       gof_omit = 'IC|Log',
                        output = 'latex',
                        stars = c('+' = .05, '*' = 0.01, '**' = 0.005, '***' = 0.001),
-                       vcov = 'stata'
+                       vcov = 'stata',
+                       gof_map = gm,
+                       gof_omit = 'DF|Deviance|AIC|BIC|Statistics|Log|p|F',
+                       notes = notes
     )
+    
+    # Create spanner
+    tab = add_header_above(tab,spanlist)
     
     # Save to file
     save_kable(tab,file = "C:/Users/Juango the Blue/Documents/GitHub/cesium/figures/table_reg_perf.tex")
@@ -194,90 +225,79 @@
     
 # Cycle Regressions (w/ lm & vcov) ---------------------------------------
     
-    # All in one
-    cycl.all <- lm(log(y_num_cycles)
-                   ~ log(x_num_nodes)
-                   + x_objective_fn
-                   + x_prob_triangle
-                   + log(x_conv_threshold)
-                   + x_est_prob
-                   , data=df)
-    summary(cycl.all)
-    #plot(cycl.all,which=c(2))
-    cycl.all.res <- density(resid(cycl.all))
-    plot(cycl.all.res)
+    # All in one 1
+    cycl.all1 <- lm(y_num_cycles ~ . - y_num_cycles, data=df)
+    summary(cycl.all1)
+    #cycl.all1.res <- density(resid(cycl.all1))
+    #plot(cycl.all1.res)
     
+    # All in one 2
+    cycl.all2 <- lm(y_num_cycles ~ (. - y_num_cycles)*(. - y_num_cycles), data=df)
+    summary(cycl.all2)
+    #cycl.all2.res <- density(resid(cycl.all2))
+    #plot(cycl.all2.res)
     
     # Absolute sum only
-    cycl.abs <- lm(log(y_num_cycles)
-                   ~ log(x_num_nodes)
-                   + x_prob_triangle
-                   + log(x_conv_threshold)
-                   + x_est_prob
-                   , data=df_abs)
+    cycl.abs <- lm(y_num_cycles ~ (. - y_num_cycles)*(. - y_num_cycles), data=df_abs)
     summary(cycl.abs)
-    #plot(cycl.abs,which=c(2))
-    cycl.abs.res <- density(resid(cycl.abs))
-    plot(cycl.abs.res)
+    #cycl.abs.res <- density(resid(cycl.abs))
+    #plot(cycl.abs.res)
     
     # Sphere only
-    cycl.sph <- lm(log(y_num_cycles)
-                   ~ log(x_num_nodes)
-                   + x_prob_triangle
-                   + log(x_conv_threshold)
-                   + x_est_prob
-                   , data=df_sph)
+    cycl.sph <- lm(y_num_cycles ~ (. - y_num_cycles)*(. - y_num_cycles), data=df_sph)
     summary(cycl.sph)
-    #plot(cycl.sph,which=c(2))
-    cycl.sph.res <- density(resid(cycl.sph))
-    plot(cycl.sph.res)
+    #cycl.sph.res <- density(resid(cycl.sph))
+    #plot(cycl.sph.res)
     
     # Ackley only
-    cycl.ack <- lm(log(y_num_cycles)
-                   ~ log(x_num_nodes)
-                   + x_prob_triangle
-                   + log(x_conv_threshold)
-                   + x_est_prob
-                   , data=df_ack)
+    cycl.ack <- lm(y_num_cycles ~ (. - y_num_cycles)*(. - y_num_cycles), data=df_ack)
     summary(cycl.ack)
-    #plot(cycl.ack,which=c(2))
-    cycl.ack.res <- density(resid(cycl.ack))
-    plot(cycl.ack.res)
+    #cycl.ack.res <- density(resid(cycl.ack))
+    #plot(cycl.ack.res)
     
     # Levy only
-    df_lvy$x_ep_poly <- with(df_lvy, poly(x_est_prob, degree = 2))[, c(-1)]
-    cycl.lvy <- lm(log(y_num_cycles)
-                   ~ log(x_num_nodes)
-                   + x_prob_triangle
-                   + x_conv_threshold
-                   + x_est_prob
-                   + x_ep_poly
-                   , data=df_lvy)
+    cycl.lvy <- lm(y_num_cycles ~ (. - y_num_cycles)*(. - y_num_cycles), data=df_lvy)
     summary(cycl.lvy)
-    #plot(cycl.lvy,which=c(2))
-    cycl.lvy.res <- density(resid(cycl.lvy))
-    plot(cycl.lvy.res)
+    #cycl.lvy.res <- density(resid(cycl.lvy))
+    #plot(cycl.lvy.res)
+    
+    # # Levy only
+    # df_lvy$x_ep_poly <- with(df_lvy, poly(x_est_prob, degree = 2))[, c(-1)]
+    # cycl.lvy <- lm(y_num_cycles ~ (. - y_num_cycles)*(. - y_num_cycles), data=df_lvy)
+    # summary(cycl.lvy)
+    # cycl.lvy.res <- density(resid(cycl.lvy))
+    # plot(cycl.lvy.res)
 
     
-    ### Cycles Latex Tables ###
+# Cycles Latex Tables ----------------------------------------------------------
     
     # Rename functions
     mod_list = list()
-    mod_list[['All Functions']] <- cycl.all
-    mod_list[['Absolute-Sum']] <- cycl.abs
-    mod_list[['Sphere']] <- cycl.sph
-    mod_list[['Ackley']] <- cycl.ack
-    mod_list[['Levy']] <- cycl.lvy
+    mod_list[['Model III.1']] <- cycl.all1
+    mod_list[['Model III.2']] <- cycl.all2
+    mod_list[['Model III.3']] <- cycl.abs
+    mod_list[['Model III.4']] <- cycl.sph
+    mod_list[['Model III.5']] <- cycl.ack
+    mod_list[['Model III.6']] <- cycl.lvy
     
+    # Set Objective Function Column Headers
+    spanlist = c(" " = 1,
+                 "All Functions" = 2,
+                 "Absolute Sum" = 1,
+                 "Sphere" = 1,
+                 "Ackley" = 1,
+                 "Levy" = 1)
+
     # Insert dependent variable
-    rows <- tribble(~term, ~M1, ~M2, ~M3, ~M4, ~M5,
+    rows <- tribble(~term, ~M1, ~M2, ~M3, ~M4, ~M5, ~M6,
                     'Dependent Variable',
-                    'log(Num. Cycles)',
-                    'log(Num. Cycles)',
-                    'log(Num. Cycles)',
-                    'log(Num. Cycles)',
-                    'log(Num. Cycles)',
-                    '','','','','','')
+                    'Num. Cycles',
+                    'Num. Cycles',
+                    'Num. Cycles',
+                    'Num. Cycles',
+                    'Num. Cycles',
+                    'Num. Cycles',
+                    '','','','','','','')
     attr(rows, 'position') <- c(1,2)
     
     # Create rows
@@ -285,49 +305,47 @@
            'x_objective_fnsphere' = 'Fn: Sphere',
            'x_objective_fnackley' = 'Fn: Ackley',
            'x_objective_fnlevy' = 'Fn: Levy',
-           'log(x_num_nodes)' = 'log(Number of Nodes)',
-           'log(x_conv_threshold)' = 'log(Convergence Threshold)',
-           'x_prob_triangle' = 'Triangle Probability',
-           'x_est_prob' = 'Future Estimate Probability',
-           'x_ep_poly' = '(Future Estimate Probability)^2'
+           'x_num_nodes' = 'Num. Nodes',
+           'x_prob_triangle' = 'Tri. Prob.',
+           'x_conv_threshold' = 'Conv. Thresh.',
+           'x_est_prob' = 'Fut. Est. Prob.',
+           'x_num_nodes:x_prob_triangle' = 'Num. Nodes x Tri. Prob.',
+           'x_num_nodes:x_conv_threshold' = 'Num. Nodes x Conv. Thresh.',
+           'x_num_nodes:x_est_prob' = 'Num. Nodes x Fut. Est. Prob.',
+           'x_prob_triangle:x_conv_threshold' = 'Tri. Prob. x Conv. Thresh.',
+           'x_prob_triangle:x_est_prob' = 'Tri. Prob. x Fut. Est. Prob.',
+           'x_conv_threshold:x_est_prob' = 'Conv. Thresh. x Fut. Est. Prob.',
+           'x_num_nodes:x_objective_fnsphere' = 'Fn: Sphere x Num. Nodes',
+           'x_objective_fnsphere:x_prob_triangle' = 'Fn: Sphere x Tri. Prob.',
+           'x_objective_fnsphere:x_conv_threshold' = 'Fn: Sphere x Conv. Thresh.',
+           'x_objective_fnsphere:x_est_prob' = 'Fn: Sphere x Fut. Est. Prob.',
+           'x_num_nodes:x_objective_fnackley' = 'Fn: Ackley x Num. Nodes',
+           'x_objective_fnackley:x_prob_triangle' = 'Fn: Ackley x Tri. Prob.',
+           'x_objective_fnackley:x_conv_threshold' = 'Fn: Ackley x Conv. Thresh.',
+           'x_objective_fnackley:x_est_prob' = 'Fn: Ackley x Fut. Est. Prob.',
+           'x_num_nodes:x_objective_fnlevy' = 'Fn: Levy x Num. Nodes',
+           'x_objective_fnlevy:x_prob_triangle' = 'Fn: Levy x Tri. Prob.',
+           'x_objective_fnlevy:x_conv_threshold' = 'Fn: Levy x Conv. Thresh.',
+           'x_objective_fnlevy:x_est_prob' = 'Fn: Levy x Fut. Est. Prob.'
     )
+    
+    # Update stats to include
+    gm <- modelsummary::gof_map
+    gm$omit <- FALSE
     
     # Construct table
     tab = modelsummary(mod_list,
                        add_rows = rows,
                        coef_map = cm,
-                       gof_omit = 'IC|Log',
                        output = 'latex',
                        stars = c('+' = .05, '*' = 0.01, '**' = 0.005, '***' = 0.001),
-                       vcov = 'stata'
+                       vcov = 'stata',
+                       gof_map = gm,
+                       gof_omit = 'DF|Deviance|AIC|BIC|Statistics|Log|p|F'
     )
+    
+    # Create spanner
+    tab = add_header_above(tab,spanlist)
     
     # Save to file
     save_kable(tab,file = "C:/Users/Juango the Blue/Documents/GitHub/cesium/figures/table_reg_cycl.tex")
-
-    
-# Save Distributions -----------------------------------------------------------
-    
-    dist.perf.x = data.frame(perf.all.res$x,
-                             perf.abs.res$x,
-                             perf.sph.res$x,
-                             perf.ack.res$x,
-                             perf.lvy.res$x)
-    
-    dist.perf.y = data.frame(perf.all.res$y,
-                             perf.abs.res$y,
-                             perf.sph.res$y,
-                             perf.ack.res$y,
-                             perf.lvy.res$y)
-    
-    dist.cycl.x = data.frame(cycl.all.res$x,
-                             cycl.abs.res$x,
-                             cycl.sph.res$x,
-                             cycl.ack.res$x,
-                             cycl.lvy.res$x)
-    
-    dist.cycl.y = data.frame(cycl.all.res$y,
-                             cycl.abs.res$y,
-                             cycl.sph.res$y,
-                             cycl.ack.res$y,
-                             cycl.lvy.res$y)
