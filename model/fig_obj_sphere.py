@@ -42,6 +42,7 @@ surf = ax.plot_surface(x_mesh,y_mesh,z_mesh,cmap=plt.cm.viridis)
 ax.set_xlabel('$x_1$')
 ax.set_ylabel('$x_2$')
 ax.set_zlabel('$f(x_1,x_2)$')
-plt.savefig('../figures/fn_' + fn + '.eps', format='eps', bbox_inches='tight')
+for ff in fs.get_formats():
+    plt.savefig('../figures/fn_' + fn, format=ff, bbox_inches='tight')
 plt.show()
 

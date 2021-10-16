@@ -43,3 +43,6 @@ def fig_size(frac_width,frac_height,n_cols=1,n_rows=1):
         height = (page_height - tb_margins - mid_marg_height)*frac_height
         
     return (width,height)
+
+def get_formats():
+    return ['eps','jpg','pdf','tif']

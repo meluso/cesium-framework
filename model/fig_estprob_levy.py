@@ -27,6 +27,8 @@ ax.errorbar(x=df2obj2desc[fn_name]['x_est_prob']['y_sys_perf']['group'],
                  yerr=df2obj2desc[fn_name]['x_est_prob']['y_sys_perf']['ci'],
                  ls='',lw=1,marker='o',ms=5,capsize=5)
 fig.tight_layout()
-fig.savefig('../figures/est_prob_' + fn_name + '.eps',
-            format='eps', bbox_inches='tight')
 
+for ff in fs.get_formats():
+    fig.savefig('../figures/est_prob_' + fn_name,
+                format=ff,
+                bbox_inches='tight')

@@ -58,5 +58,9 @@ plt.xticks([0,20,40,60,80])
 
 
 # Save and show the figure
-plt.savefig("../figures/network_matrix.eps", dpi=300, bbox_inches='tight')
+for ff in fs.get_formats():
+    plt.savefig("../figures/network_matrix",
+                format=ff,
+                dpi=300,
+                bbox_inches='tight')
 plt.show()

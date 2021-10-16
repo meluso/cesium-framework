@@ -38,5 +38,9 @@ options = {
 nx.draw_kamada_kawai(s1.graph, **options)
 
 # Save and show the figure
-plt.savefig("../figures/network_graph.eps", dpi=300, bbox_inches='tight')
+for ff in fs.get_formats():
+    plt.savefig("../figures/network_graph",
+                format=ff,
+                dpi=300,
+                bbox_inches='tight')
 plt.show()

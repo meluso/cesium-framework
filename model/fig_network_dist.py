@@ -41,5 +41,8 @@ fig_log = plt.figure(figsize=fs.fig_size(0.4,0.25))
 plt.loglog(hist, marker=".",ls="none")
 plt.ylabel("Fraction of Artifacts")
 plt.xlabel("Artifact Degree $k_i$")
-plt.savefig("../figures/network_dist.eps", dpi=300, bbox_inches='tight')
+for ff in fs.get_formats():
+    plt.savefig("../figures/network_dist", format=ff,
+                dpi=300,
+                bbox_inches='tight')
 plt.show()
